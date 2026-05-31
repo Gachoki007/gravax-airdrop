@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GRAVAX · Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--green:#22c55e;--green-bright:#4ade80;--green-dark:#16a34a;--bg:#050e05;--card:#0b1a0b;--border:#1a3a1a;--text:#e8f5e8;--muted:#4a7a4a;--red:#e24b4a;}
+html,body{min-height:100vh;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);}
+.header{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;border-bottom:1px solid var(--border);background:rgba(5,14,5,0.95);position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:30px;height:30px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:18px;height:18px;fill:#050e05;}
+.logo-name{font-size:17px;font-weight:800;color:#fff;}
+.admin-badge{padding:4px 12px;border-radius:20px;background:#1a0a0a;border:1px solid var(--red);font-size:11px;color:var(--red);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+.connect-btn{padding:10px 20px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.connect-btn:hover{background:var(--green);color:#050e05;}
+.connect-btn.connected{background:#0a1f0a;border-color:#22c55e55;color:var(--green-bright);font-size:12px;}
+.owner-bar{padding:10px 40px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.owner-bar.warn{background:#1a0a0a;border-bottom:1px solid #3a1a1a;color:var(--red);}
+.owner-bar.ok{background:#0a1f0a;border-bottom:1px solid var(--border);color:var(--green-bright);}
+.main{max-width:780px;margin:0 auto;padding:32px 40px;}
+.page-title{font-size:24px;font-weight:900;color:#fff;margin-bottom:4px;}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:32px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;}
+.card-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:6px;}
+.inp{width:100%;background:#050e05;border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:13px;outline:none;font-family:'Inter',sans-serif;}
+.inp:focus{border-color:var(--green);}
+.inp::placeholder{color:#2a4a2a;}
+select.inp{cursor:pointer;}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;background:var(--green);color:#050e05;cursor:pointer;font-size:14px;font-weight:800;font-family:'Inter',sans-serif;transition:all 0.15s;margin-top:4px;}
+.btn:hover{background:var(--green-dark);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.btn-secondary{background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:600;}
+.btn-secondary:hover{background:var(--card);color:var(--text);border-color:var(--green);}
+.tx-result{margin-top:12px;}
+.tx-link{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;background:#0d2e0d;border:1px solid #22c55e33;color:var(--green-bright);font-size:12px;font-weight:600;text-decoration:none;}
+.tx-link:hover{border-color:var(--green);}
+.progress-card{background:#050e05;border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:14px;}
+.pc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.pc-addr{font-size:12px;color:var(--green-bright);font-family:monospace;}
+.pc-earned{font-size:12px;color:var(--muted);font-weight:600;}
+.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pc-q{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.pc-q.done{border-color:#22c55e44;background:#0a1f0a;}
+.pc-q-num{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;}
+.pc-q-name{font-size:12px;color:var(--text);font-weight:600;margin-bottom:4px;}
+.pc-q-status{font-size:11px;font-weight:700;}
+.pc-q.done .pc-q-status{color:var(--green);}
+.pc-q:not(.done) .pc-q-status{color:var(--muted);}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:12px;color:var(--muted);font-weight:600;}
+.info-val{font-size:12px;color:var(--green-bright);font-family:monospace;}
+.info-val.white{color:#fff;}
+.search-row{display:flex;gap:8px;}
+.search-row .inp{flex:1;}
+.search-btn{padding:11px 20px;border-radius:8px;border:1px solid var(--green);background:transparent;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s;}
+.search-btn:hover{background:var(--green);color:#050e05;}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:24px;cursor:pointer;}
+.back-link:hover{color:var(--green);}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);background:#0a1f0a;border:1px solid #22c55e55;border-radius:10px;padding:12px 20px;font-size:13px;color:var(--green-bright);font-weight:600;display:flex;align-items:center;gap:10px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:300;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{border-color:#e24b4a55;color:var(--red);background:#1a0a0a;}
+@media(max-width:600px){.main{padding:20px;}.header{padding:14px 20px;}.owner-bar{padding:10px 20px;}.pc-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 3L4 8v8l8 5 8-5V8L12 3zm0 2.5l5.5 3.4v6.2L12 18.5l-5.5-3.4V8.9L12 5.5z"/></svg></div>
+    <span class="logo-name">GRAVAX</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+  <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect owner wallet</button>
+</header>
+
+<div class="owner-bar warn" id="ownerBar">⚠ Connect the owner wallet to use this panel</div>
+
+<div class="main">
+  <a class="back-link" href="index.html">← Back to quest board</a>
+  <div class="page-title">Quest Admin Panel</div>
+  <p class="page-sub">Mark quests complete for users — triggers on-chain GRAV transfer instantly.</p>
+
+  <!-- MARK COMPLETE -->
+  <div class="card">
+    <div class="card-title">Mark quest complete</div>
+    <div class="card-sub">Select a user and quest. Calling this sends GRAV from the contract to the user on Avalanche C-Chain.</div>
+    <div class="field">
+      <label>User wallet address</label>
+      <input class="inp" id="userAddr" placeholder="0x user wallet address…"/>
+    </div>
+    <div class="field">
+      <label>Quest</label>
+      <select class="inp" id="questSelect">
+        <option value="0">Quest 1 — Follow @greenavax on X · 50 GRAV</option>
+        <option value="1">Quest 2 — Connect wallet to Retro 9000 · 100 GRAV</option>
+        <option value="2">Quest 3 — Link X account in Retro 9000 · 100 GRAV</option>
+        <option value="3">Quest 4 — Paste AVAX C-Chain address · 50 GRAV</option>
+      </select>
+    </div>
+    <button class="btn" id="completeBtn" onclick="completeQuest()" disabled>Complete quest &amp; send GRAV on-chain</button>
+    <div class="tx-result" id="txResult"></div>
+  </div>
+
+  <!-- CHECK PROGRESS -->
+  <div class="card">
+    <div class="card-title">Check user progress</div>
+    <div class="card-sub">Look up any wallet to see their on-chain quest completion status and total GRAV earned.</div>
+    <div class="search-row">
+      <input class="inp" id="checkAddr" placeholder="0x wallet address…"/>
+      <button class="search-btn" onclick="checkProgress()">Check</button>
+    </div>
+    <div id="progressResult"></div>
+  </div>
+
+  <!-- CONTRACT INFO -->
+  <div class="card">
+    <div class="card-title">Contract info</div>
+    <div class="card-sub">Live data from Avalanche C-Chain mainnet.</div>
+    <div class="info-row"><span class="info-label">Quest contract</span><span class="info-val">0xc2174CFca51e6F2ab6501dab6875610C836196a7</span></div>
+    <div class="info-row"><span class="info-label">GRAV token</span><span class="info-val">0xBB370…79f</span></div>
+    <div class="info-row"><span class="info-label">Network</span><span class="info-val white">Avalanche C-Chain (43114)</span></div>
+    <div class="info-row"><span class="info-label">Contract GRAV balance</span><span class="info-val" id="contractBal">—</span></div>
+    <div class="info-row"><span class="info-label">Total participants</span><span class="info-val" id="adminParticipants">—</span></div>
+    <div class="info-row" style="border-bottom:none;"><span class="info-label">Owner wallet</span><span class="info-val" id="ownerDisplay">—</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const CONTRACT_ADDRESS = "0xc2174CFca51e6F2ab6501dab6875610C836196a7";
+const TOKEN_ADDRESS    = "0xBB370Fdb0c0B9c717ECAbC5949d461F97F64979f";
+const AVAX_CHAIN_ID    = "0xa86a";
+
+const CONTRACT_ABI = [
+  "function completeQuest(address user, uint256 questId) external",
+  "function getUserProgress(address) view returns (bool[4])",
+  "function totalEarned(address) view returns (uint256)",
+  "function owner() view returns (address)",
+  "function contractBalance() view returns (uint256)",
+  "function participantCount() view returns (uint256)"
+];
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)","function decimals() view returns (uint8)"];
+
+const QUEST_NAMES = [
+  "Follow @greenavax on X",
+  "Connect wallet to Retro 9000",
+  "Link X account in Retro 9000",
+  "Paste AVAX C-Chain address"
+];
+
+let provider, signer, contract, connectedAddress, isOwner = false;
+const readProvider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc");
+
+async function connectWallet(){
+  if(!window.ethereum){ showToast("No wallet found","err"); return; }
+  try {
+    await window.ethereum.request({method:"eth_requestAccounts"});
+    await switchToMainnet();
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer   = provider.getSigner();
+    connectedAddress = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    const ownerAddr = await contract.owner();
+    document.getElementById("ownerDisplay").textContent = ownerAddr.slice(0,10)+"…"+ownerAddr.slice(-6);
+    isOwner = connectedAddress.toLowerCase() === ownerAddr.toLowerCase();
+    const btn = document.getElementById("connectBtn");
+    btn.textContent = connectedAddress.slice(0,6)+"…"+connectedAddress.slice(-4);
+    btn.classList.add("connected");
+    const bar = document.getElementById("ownerBar");
+    if(isOwner){
+      bar.className = "owner-bar ok";
+      bar.textContent = "✓ Owner wallet connected — full admin access granted";
+      document.getElementById("completeBtn").disabled = false;
+    } else {
+      bar.className = "owner-bar warn";
+      bar.textContent = "⚠ Connected wallet is not the contract owner — read-only mode";
+    }
+    await loadContractInfo();
+    showToast("Wallet connected");
+  } catch(e){ showToast("Error: "+e.message,"err"); }
+}
+
+async function switchToMainnet(){
+  try {
+    await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:AVAX_CHAIN_ID}]});
+  } catch(e){
+    if(e.code===4902){
+      await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
+        chainId:AVAX_CHAIN_ID,chainName:"Avalanche C-Chain",
+        nativeCurrency:{name:"AVAX",symbol:"AVAX",decimals:18},
+        rpcUrls:["https://api.avax.network/ext/bc/C/rpc"],
+        blockExplorerUrls:["https://snowtrace.io"]
+      }]});
+    }
+  }
+}
+
+async function loadContractInfo(){
+  try {
+    const c = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, readProvider);
+    const [balRaw, count] = await Promise.all([c.contractBalance(), c.participantCount()]);
+    document.getElementById("contractBal").textContent = parseFloat(ethers.utils.formatEther(balRaw)).toFixed(2)+" GRAV";
+    document.getElementById("adminParticipants").textContent = count.toString();
+  } catch(e){}
+}
+
+async function completeQuest(){
+  const addr = document.getElementById("userAddr").value.trim();
+  const qid  = parseInt(document.getElementById("questSelect").value);
+  if(!addr||!addr.startsWith("0x")||addr.length<10){ showToast("Enter a valid wallet address","err"); return; }
+  if(!isOwner){ showToast("Not the contract owner","err"); return; }
+  const btn = document.getElementById("completeBtn");
+  btn.disabled = true; btn.textContent = "Sending transaction…";
+  try {
+    const tx = await contract.completeQuest(addr, qid);
+    showToast("Transaction sent — confirming on-chain…");
+    const receipt = await tx.wait();
+    document.getElementById("txResult").innerHTML =
+      `<a class="tx-link" href="https://snowtrace.io/tx/${tx.hash}" target="_blank">↗ View on Snowtrace (confirmed in block ${receipt.blockNumber})</a>`;
+    const rewards = [50,100,100,50];
+    showToast(`✓ Quest ${qid+1} complete — ${rewards[qid]} GRAV sent to ${addr.slice(0,8)}…`);
+    await loadContractInfo();
+  } catch(e){
+    showToast("Error: "+(e.reason||e.message),"err");
+    document.getElementById("txResult").innerHTML = `<p style="font-size:12px;color:var(--red);margin-top:8px;">${e.reason||e.message}</p>`;
+  }
+  btn.disabled = false; btn.textContent = "Complete quest & send GRAV on-chain";
+}
+
+async function checkProgress(){
+  const addr = document.getElementById("checkAddr").value.trim();
+  if(!addr||!addr.startsWith("0x")||addr.length<10){ showToast("Enter a valid wallet address","err"); return; }
+  try {
+    const c = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, readProvider);
+    const [prog, earnedRaw] = await Promise.all([c.getUserProgress(addr), c.totalEarned(addr)]);
+    const earned = Math.round(parseFloat(ethers.utils.formatEther(earnedRaw)));
+    const names = QUEST_NAMES;
+    document.getElementById("progressResult").innerHTML = `
+      <div class="progress-card">
+        <div class="pc-header">
+          <span class="pc-addr">${addr.slice(0,10)}…${addr.slice(-6)}</span>
+          <span class="pc-earned">${earned} GRAV earned</span>
+        </div>
+        <div class="pc-grid">
+          ${names.map((name,i)=>`
+            <div class="pc-q${prog[i]?' done':''}">
+              <div class="pc-q-num">Quest ${i+1}</div>
+              <div class="pc-q-name">${name}</div>
+              <div class="pc-q-status">${prog[i]?'✓ Completed':'Pending'}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } catch(e){ showToast("Error: "+e.message,"err"); }
+}
+
+function showToast(msg, type=""){
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.className = "toast"+(type==="err"?" err":"");
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),4000);
+}
+
+loadContractInfo();
+</script>
+</body>
+</html>
