@@ -1,626 +1,880 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GRAVAX · Airdrop Campaign</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --green:#22c55e;--green2:#16a34a;--green3:#4ade80;
-  --bg:#050e05;--bg2:#071007;
-  --card:#0d1f0d;--card2:#0a1a0a;
-  --border:#1c3a1c;--border2:#234523;
-  --text:#f0f7f0;--text2:#a8c5a8;--muted:#5a8a5a;
-}
-html,body{min-height:100vh;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow-x:hidden;}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GREENAVAX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Proxima+Nova:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Proxima Nova via Adobe Fonts fallback — using closest Google match -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --green:       #00a855;
+      --green-dim:   #007a3d;
+      --green-dark:  #004d26;
+      --gold:        #b8860b;
+      --gold-light:  #d4a017;
+      --gold-bright: #c8920f;
+      --red:         #e02020;
+      --red-dim:     #b01818;
+      --bg:          #e8f5ec;
+      --card:        rgba(255, 255, 255, 0.82);
+      --border:      rgba(0,140,70,0.18);
+      --border-gold: rgba(180,130,10,0.35);
+      --text:        #0d2e18;
+      --muted:       #3a7a50;
+      --font-head:   'Orbitron', sans-serif;
+      --font-body:   'Nunito Sans', sans-serif;
+      --font-label:  'Rajdhani', sans-serif;
+    }
 
-/* LOGO SVG */
-.gravax-logo{display:flex;align-items:center;gap:9px;}
-.gravax-logo-svg{width:32px;height:32px;flex-shrink:0;}
-.gravax-logo-text{font-size:17px;font-weight:800;color:#fff;letter-spacing:0.03em;}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HEADER */
-.header{display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:rgba(5,14,5,0.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
-.connect-btn{display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:8px;border:1.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:0.04em;transition:all 0.15s;}
-.connect-btn:hover{background:var(--green);color:#050e05;}
-.connect-btn.connected{background:#091a09;border-color:#22c55e44;color:var(--green3);font-size:12px;}
-.connect-btn svg{width:15px;height:15px;flex-shrink:0;}
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-/* WALLET BAR */
-.wallet-bar{display:none;background:#071407;border-bottom:1px solid var(--border);padding:10px 48px;gap:32px;flex-wrap:wrap;align-items:center;}
-.wallet-bar.show{display:flex;}
-.wb-item{display:flex;flex-direction:column;gap:1px;}
-.wb-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:700;}
-.wb-val{font-size:13px;color:var(--green3);font-weight:700;font-family:monospace;}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-/* HERO */
-.hero{display:grid;grid-template-columns:1fr 420px;min-height:440px;padding:52px 48px 36px;gap:0;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 65% 40%,#0d3a0d 0%,transparent 55%);pointer-events:none;}
-.hero-grid-bg{position:absolute;bottom:0;left:0;right:0;height:100px;opacity:0.1;pointer-events:none;}
-.hero-left{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;}
-.live-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;background:#091a09;border:1px solid var(--border2);font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:22px;width:fit-content;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.hero-h1{font-size:58px;font-weight:900;color:#fff;line-height:1.0;letter-spacing:-0.02em;margin-bottom:0;}
-.hero-h2{font-size:58px;font-weight:900;color:var(--green);line-height:1.0;letter-spacing:-0.02em;margin-bottom:22px;}
-.hero-sub{font-size:15px;color:var(--text2);line-height:1.65;max-width:430px;margin-bottom:30px;}
-.hero-sub strong{color:var(--green);}
-.pillars{display:flex;gap:28px;flex-wrap:wrap;}
-.pillar{display:flex;align-items:center;gap:10px;}
-.pillar-circle{width:30px;height:30px;border-radius:50%;background:#091a09;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.pillar-name{font-size:12px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:0.05em;}
-.pillar-sub{font-size:11px;color:var(--muted);}
+    /* ═══════════════════════════════════════
+       CANVAS BACKGROUND — cosmic green weave
+    ═══════════════════════════════════════ */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.7;
+    }
 
-/* HERO TREE */
-.hero-right{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;}
-.tree-container{width:380px;height:380px;position:relative;}
-.tree-glow-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 55%,#22c55e18 0%,transparent 65%);border-radius:50%;}
+    /* ═══════════════════════════════════════
+       CONTENT WRAPPER
+    ═══════════════════════════════════════ */
+    .content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px;
+    }
 
-/* STATS BAR */
-.stats-bar{margin:0 48px 44px;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:22px 36px;display:flex;align-items:center;gap:0;}
-.stat-item{flex:1;display:flex;align-items:center;gap:14px;}
-.stat-item+.stat-item{border-left:1px solid var(--border);padding-left:32px;}
-.stat-icon{width:38px;height:38px;border-radius:9px;background:#091a09;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.09em;font-weight:700;margin-bottom:3px;}
-.stat-val{font-size:19px;font-weight:900;color:var(--green);}
-.stat-val.w{color:#fff;}
+    /* ═══════════════════════════════════════
+       TOP BADGE
+    ═══════════════════════════════════════ */
+    .top-badge {
+      margin-top: 36px;
+      font-family: var(--font-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 6px 18px;
+      background: rgba(0,255,127,0.03);
+    }
 
-/* QUESTS */
-.quests-section{padding:0 48px 52px;}
-.quests-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
-.q-line{flex:1;height:1px;background:var(--border);}
-.q-diamond{width:9px;height:9px;background:var(--green);transform:rotate(45deg);flex-shrink:0;}
-.q-header-text{font-size:20px;font-weight:900;color:#fff;letter-spacing:0.14em;text-transform:uppercase;}
-.quest-list{display:flex;flex-direction:column;gap:10px;}
+    /* ═══════════════════════════════════════
+       PROOF OF CONSERVATION
+    ═══════════════════════════════════════ */
+    .poc-label {
+      margin-top: 28px;
+      font-family: var(--font-label);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
 
-/* QUEST CARD */
-.quest-card{background:var(--card);border:1px solid var(--border2);border-radius:13px;padding:18px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
-.quest-card:hover{border-color:#22c55e55;background:#0e220e;}
-.quest-card.done{border-color:#22c55e44;background:#091a09;}
-.quest-card.locked{opacity:0.38;pointer-events:none;}
-.q-icon-wrap{width:50px;height:50px;border-radius:12px;background:#0a1f0a;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.quest-card.done .q-icon-wrap{background:#0d2e0d;border-color:#22c55e33;}
-.q-icon-inner{width:30px;height:30px;border-radius:8px;background:#143a14;display:flex;align-items:center;justify-content:center;}
-.q-body{flex:1;min-width:0;}
-.q-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px;}
-.q-desc{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.4;}
-.q-desc a{color:var(--green);text-decoration:none;}
-.q-desc a:hover{text-decoration:underline;}
-.q-step-badge{display:inline-block;padding:3px 9px;border-radius:4px;background:#0a1f0a;border:1px solid var(--border);font-size:10px;font-weight:800;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
-.q-chevron{font-size:22px;color:#22c55e66;font-weight:300;flex-shrink:0;transition:color 0.15s;}
-.quest-card:hover .q-chevron{color:var(--green);}
-.quest-card.done .q-chevron{color:var(--green);}
-.q-reward-box{background:#0a1f0a;border:1px solid var(--border2);border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;min-width:105px;}
-.quest-card.done .q-reward-box{border-color:#22c55e33;background:#0d2e0d;}
-.qr-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:3px;}
-.qr-amount{font-size:24px;font-weight:900;color:var(--green);line-height:1.1;}
-.qr-unit{font-size:11px;font-weight:800;color:var(--green);margin-bottom:2px;}
-.qr-xp{font-size:11px;color:var(--muted);font-weight:600;}
+    /* ═══════════════════════════════════════
+       GREENAVAX HERO TITLE — gold/green
+    ═══════════════════════════════════════ */
+    .hero-title {
+      margin-top: 10px;
+      font-family: var(--font-head);
+      font-size: clamp(40px, 9vw, 82px);
+      font-weight: 900;
+      letter-spacing: 4px;
+      line-height: 1;
+      text-align: center;
+      background: linear-gradient(
+        135deg,
+        var(--gold-bright) 0%,
+        var(--gold-light)  20%,
+        var(--green)       45%,
+        var(--gold)        65%,
+        var(--gold-bright) 80%,
+        var(--green-dim)   100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 28px rgba(212,160,23,0.4)) drop-shadow(0 0 60px rgba(0,255,127,0.2));
+      animation: shimmer 5s linear infinite;
+      background-size: 300% 300%;
+    }
 
-/* AIRDROP BANNER */
-.airdrop-banner{margin:0 48px 44px;background:linear-gradient(120deg,#091a09 0%,#0d2e0d 60%,#091a09 100%);border:1px solid #22c55e2a;border-radius:13px;padding:26px 32px;display:flex;align-items:center;gap:22px;position:relative;overflow:hidden;}
-.ab-glow{position:absolute;right:-20px;top:-20px;width:220px;height:220px;background:radial-gradient(circle,#22c55e18 0%,transparent 65%);pointer-events:none;}
-.ab-icon-wrap{width:54px;height:54px;border-radius:13px;background:#0d2e0d;border:1px solid #22c55e33;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
-.ab-body{flex:1;position:relative;z-index:1;}
-.ab-body p{font-size:15px;color:var(--text2);font-weight:500;margin-bottom:3px;}
-.ab-body strong{font-size:21px;font-weight:900;color:var(--green);}
-.ab-coins{display:flex;gap:10px;align-items:center;position:relative;z-index:1;}
-.ab-coin{width:42px;height:42px;border-radius:50%;background:#0d2e0d;border:2px solid #22c55e33;display:flex;align-items:center;justify-content:center;}
+    @keyframes shimmer {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-/* FOOTER */
-.footer{border-top:1px solid var(--border);padding:22px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
-.footer-center{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px;}
-.footer-center span{color:#fff;font-weight:700;}
-.footer-icons{display:flex;gap:10px;}
-.f-icon{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;text-decoration:none;}
-.f-icon:hover{border-color:var(--green);}
-.f-icon svg{width:15px;height:15px;fill:var(--muted);}
-.f-icon:hover svg{fill:var(--green);}
+    .hero-sub {
+      margin-top: 8px;
+      font-family: var(--font-label);
+      font-size: 12px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      opacity: 0.65;
+      text-transform: uppercase;
+    }
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:200;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:#0b1c0b;border:1px solid #22c55e2a;border-radius:16px;padding:28px;width:400px;max-width:94vw;}
-.modal h3{font-size:18px;font-weight:800;color:#fff;margin-bottom:6px;}
-.modal p{font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:16px;}
-.modal-close{float:right;background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1;margin-top:-4px;}
-.modal-close:hover{color:var(--green);}
-.w-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
-.w-opt:hover{border-color:var(--green);background:#0d2e0d;}
-.w-logo{width:36px;height:36px;border-radius:8px;background:#0d2e0d;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;}
-.w-name{font-size:13px;font-weight:700;color:#fff;}
-.w-sub{font-size:11px;color:var(--muted);}
-.ext-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:#0d2e0d;border:1px solid #22c55e2a;border-radius:10px;color:var(--green3);font-size:13px;font-weight:600;text-decoration:none;margin-bottom:14px;transition:border-color 0.15s;}
-.ext-link:hover{border-color:var(--green);}
-.inp{width:100%;background:#050e05;border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:13px;outline:none;font-family:'Inter',sans-serif;}
-.inp:focus{border-color:var(--green);}
-.inp::placeholder{color:#2a4a2a;}
-.m-actions{display:flex;gap:8px;margin-top:12px;}
-.m-cancel{flex:1;padding:11px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;}
-.m-cancel:hover{color:#fff;border-color:#22c55e33;}
-.m-confirm{flex:1;padding:11px;border-radius:8px;border:none;background:var(--green);color:#050e05;cursor:pointer;font-size:13px;font-weight:800;font-family:'Inter',sans-serif;}
-.m-confirm:hover{background:var(--green2);}
-.pending-note{background:#0d2e0d;border:1px solid #22c55e1a;border-radius:8px;padding:10px 12px;font-size:11px;color:var(--muted);line-height:1.65;margin-top:12px;}
+    /* ═══════════════════════════════════════
+       CONNECT WALLET BUTTON
+    ═══════════════════════════════════════ */
+    #connectBtn {
+      margin-top: 28px;
+      padding: 15px 48px;
+      background: transparent;
+      border: 1.5px solid var(--green);
+      color: var(--green);
+      font-family: var(--font-label);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    #connectBtn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--green);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s;
+      z-index: -1;
+    }
+    #connectBtn:hover::before { transform: scaleX(1); }
+    #connectBtn:hover { color: var(--bg); }
+    #connectBtn.connected {
+      border-color: var(--gold);
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 2px;
+      cursor: default;
+    }
+    #connectBtn.connected::before { display: none; }
 
-/* TOAST */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(14px);background:#091a09;border:1px solid #22c55e44;border-radius:10px;padding:12px 20px;font-size:13px;color:var(--green3);font-weight:600;display:flex;align-items:center;gap:10px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:300;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.err{border-color:#e24b4a44;color:#e24b4a;background:#1a0505;}
+    #walletInfo {
+      margin-top: 10px;
+      font-family: var(--font-label);
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--muted);
+      min-height: 16px;
+      text-transform: uppercase;
+    }
 
-/* RESPONSIVE */
-@media(max-width:780px){
-  .header,.wallet-bar.show,.stats-bar,.quests-section,.airdrop-banner,.footer{padding-left:20px;padding-right:20px;}
-  .stats-bar{margin-left:20px;margin-right:20px;flex-direction:column;gap:16px;padding:18px 20px;}
-  .stat-item+.stat-item{border-left:none;border-top:1px solid var(--border);padding-left:0;padding-top:16px;}
-  .airdrop-banner{margin-left:20px;margin-right:20px;}
-  .hero{grid-template-columns:1fr;padding:36px 20px 24px;}
-  .hero-right{display:none;}
-  .hero-h1,.hero-h2{font-size:40px;}
-}
-</style>
+    /* ═══════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════ */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green-dim), var(--gold), var(--green-dim), transparent);
+      margin: 40px 0 32px;
+      opacity: 0.4;
+    }
+
+    /* ═══════════════════════════════════════
+       SECTION HEADING
+    ═══════════════════════════════════════ */
+    .section-heading {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .section-heading h2 {
+      font-family: var(--font-head);
+      font-size: clamp(14px, 3vw, 20px);
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+    .section-heading p {
+      margin-top: 8px;
+      font-family: var(--font-label);
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--muted);
+    }
+
+    /* ═══════════════════════════════════════
+       RANK GRID — 2 rows × 3 cols
+    ═══════════════════════════════════════ */
+    #rankGrid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      padding-bottom: 8px;
+    }
+
+    @media (max-width: 640px) {
+      #rankGrid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 400px) {
+      #rankGrid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════
+       RANK CARD
+    ═══════════════════════════════════════ */
+    .rank-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 22px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .rank-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .rank-card:hover::before { opacity: 1; }
+    .rank-card:hover {
+      border-color: rgba(0,255,127,0.3);
+      transform: translateY(-2px);
+    }
+    .rank-card.claimed-card {
+      border-color: rgba(0,196,94,0.4);
+    }
+    .rank-card.claimed-card::before {
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.8;
+    }
+
+    /* corner accent */
+    .rank-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 32px; height: 32px;
+      border-top: 1px solid var(--border-gold);
+      border-left: 1px solid var(--border-gold);
+      opacity: 0.5;
+    }
+
+    .rank-number {
+      font-family: var(--font-head);
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      opacity: 0.6;
+      text-transform: uppercase;
+    }
+
+    .rank-name {
+      font-family: var(--font-head);
+      font-size: clamp(13px, 2.2vw, 17px);
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .rank-price {
+      font-family: var(--font-label);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 1px;
+    }
+
+    .rank-desc {
+      font-family: var(--font-body);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+
+    /* ═══════════════════════════════════════
+       CLAIM BUTTON
+    ═══════════════════════════════════════ */
+    .claim-btn {
+      margin-top: 10px;
+      padding: 11px 8px;
+      width: 100%;
+      border: none;
+      font-family: var(--font-label);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .claim-btn.unclaimed {
+      background: var(--red);
+      color: #fff;
+    }
+    .claim-btn.unclaimed:hover:not(:disabled) {
+      background: #ff5555;
+      letter-spacing: 4px;
+    }
+    .claim-btn.unclaimed:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .claim-btn.claimed {
+      background: var(--green);
+      color: var(--bg);
+      cursor: default;
+      font-weight: 900;
+    }
+
+    /* ═══════════════════════════════════════
+       INFO STRIP
+    ═══════════════════════════════════════ */
+    .info-strip {
+      margin-top: 36px;
+      width: 100%;
+      border: 1px solid var(--border-gold);
+      background: rgba(212,160,23,0.04);
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .info-item {
+      font-family: var(--font-label);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+    .info-item span {
+      color: var(--green);
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════
+       SOCIAL FOOTER
+    ═══════════════════════════════════════ */
+    .social-footer {
+      margin-top: 44px;
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .social-label {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .social-buttons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 28px;
+      border: 1.5px solid;
+      font-family: var(--font-label);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .social-btn.twitter {
+      border-color: rgba(0,0,0,0.2);
+      color: #1a1a1a;
+      background: rgba(0,0,0,0.04);
+    }
+    .social-btn.twitter:hover {
+      border-color: #000;
+      background: rgba(0,0,0,0.08);
+      color: #000;
+    }
+
+    .social-btn.telegram {
+      border-color: rgba(41,182,246,0.35);
+      color: #29b6f6;
+      background: rgba(41,182,246,0.04);
+    }
+    .social-btn.telegram:hover {
+      border-color: #29b6f6;
+      background: rgba(41,182,246,0.1);
+    }
+
+    .social-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .copyright {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    /* ═══════════════════════════════════════
+       STATUS TOAST
+    ═══════════════════════════════════════ */
+    #statusMsg {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(232,245,236,0.97);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-label);
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 14px 28px;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    #statusMsg.show   { opacity: 1; }
+    #statusMsg.error  { border-color: var(--red);   color: var(--red); }
+    #statusMsg.success{ border-color: var(--green);  color: var(--green); }
+
+    /* ═══════════════════════════════════════
+       LOADING OVERLAY
+    ═══════════════════════════════════════ */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(232,245,236,0.92);
+      z-index: 150;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(4px);
+    }
+    #loadingOverlay.active { display: flex; }
+    .loading-text {
+      font-family: var(--font-head);
+      font-size: 22px;
+      letter-spacing: 8px;
+      color: var(--green);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .loading-sub {
+      font-family: var(--font-label);
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--muted);
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
-  <div class="gravax-logo">
-    <!-- Real GRAVAX logo SVG -->
-    <svg class="gravax-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="gLogo" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#4ade80"/>
-          <stop offset="100%" stop-color="#16a34a"/>
-        </radialGradient>
-      </defs>
-      <circle cx="50" cy="50" r="50" fill="url(#gLogo)"/>
-      <!-- large A top -->
-      <polygon points="50,18 74,62 26,62" fill="white" opacity="0.95"/>
-      <polygon points="50,30 67,62 33,62" fill="url(#gLogo)"/>
-      <!-- small A bottom -->
-      <polygon points="50,58 64,82 36,82" fill="white" opacity="0.9"/>
-      <polygon points="50,67 60,82 40,82" fill="url(#gLogo)"/>
-    </svg>
-    <span class="gravax-logo-text">GRAVAX</span>
-  </div>
-  <button class="connect-btn" id="connectBtn" onclick="connectWallet()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2.5"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
-    CONNECT WALLET
-  </button>
-</header>
+<!-- ═══ BACKGROUND CANVAS ═══ -->
+<canvas id="bgCanvas"></canvas>
 
-<!-- WALLET BAR -->
-<div class="wallet-bar" id="walletBar">
-  <div class="wb-item"><span class="wb-label">Wallet</span><span class="wb-val" id="wbAddr">—</span></div>
-  <div class="wb-item"><span class="wb-label">GRAV Balance</span><span class="wb-val" id="wbBal">—</span></div>
-  <div class="wb-item"><span class="wb-label">Quests Done</span><span class="wb-val" id="wbDone">0 / 4</span></div>
-  <div class="wb-item"><span class="wb-label">GRAV Earned</span><span class="wb-val" id="wbEarned">0 GRAV</span></div>
+<div class="content">
+
+  <!-- ═══ TOP BADGE ═══ -->
+  <div class="top-badge">AVAX C-CHAIN · MAINNET · ON-CHAIN RANKS</div>
+
+  <!-- ═══ PROOF OF CONSERVATION ═══ -->
+  <div class="poc-label">⬡ PROOF OF CONSERVATION ⬡</div>
+
+  <!-- ═══ HERO TITLE ═══ -->
+  <div class="hero-title">GREENAVAX</div>
+  <div class="hero-sub">Guardian Rank Protocol</div>
+
+  <!-- ═══ CONNECT WALLET ═══ -->
+  <button id="connectBtn" onclick="connectWallet()">⬡ CONNECT WALLET</button>
+  <div id="walletInfo"></div>
+
+  <!-- ═══ DIVIDER ═══ -->
+  <div class="divider"></div>
+
+  <!-- ═══ SECTION HEADING ═══ -->
+  <div class="section-heading">
+    <h2>Claim Your Conservation Ranks</h2>
+    <p>Each rank unlocks $GRAV rewards · staking multipliers · NFTs · exclusive access · All on-chain</p>
+  </div>
+
+  <!-- ═══ RANK GRID ═══ -->
+  <div id="rankGrid"></div>
+
+  <!-- ═══ INFO STRIP ═══ -->
+  <div class="info-strip">
+    <div class="info-item">Payments → <span>Instant & Final</span></div>
+    <div class="info-item">Ranks → <span>Permanent On-Chain</span></div>
+    <div class="info-item">Memory → <span>Wallet-Bound Forever</span></div>
+    <div class="info-item">Network → <span>AVAX C-Chain</span></div>
+  </div>
+
+  <!-- ═══ SOCIAL FOOTER ═══ -->
+  <div class="social-footer">
+    <div class="social-label">Join the Network</div>
+    <div class="social-buttons">
+
+      <!-- X / Twitter -->
+      <a class="social-btn twitter" href="https://x.com/greenavax" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.738-8.835L1.254 2.25H8.08l4.262 5.633 5.902-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        TWITTER
+      </a>
+
+      <!-- Telegram -->
+      <a class="social-btn telegram" href="https://t.me/greenavax" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+        TELEGRAM
+      </a>
+
+    </div>
+    <div class="copyright">© GREENAVAX · All ranks are permanent · Powered by AVAX C-Chain</div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ═══ STATUS TOAST ═══ -->
+<div id="statusMsg"></div>
+
+<!-- ═══ LOADING OVERLAY ═══ -->
+<div id="loadingOverlay">
+  <div class="loading-text">PROCESSING</div>
+  <div class="loading-sub">Confirm in your wallet · Do not close</div>
 </div>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero::before"></div>
-  <svg class="hero-grid-bg" viewBox="0 0 1400 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 75 Q350 35 700 55 Q1050 75 1400 25" stroke="#22c55e" stroke-width="1.2" fill="none"/>
-    <path d="M0 88 Q350 52 700 68 Q1050 88 1400 42" stroke="#22c55e" stroke-width="0.6" fill="none"/>
-    <line x1="175" y1="0" x2="175" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="350" y1="0" x2="350" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="525" y1="0" x2="525" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="700" y1="0" x2="700" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="875" y1="0" x2="875" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="1050" y1="0" x2="1050" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-    <line x1="1225" y1="0" x2="1225" y2="100" stroke="#22c55e" stroke-width="0.4"/>
-  </svg>
-  <div class="hero-left">
-    <div class="live-badge"><span class="live-dot"></span>Live on Avalanche C-Chain</div>
-    <div class="hero-h1">GRAVAX</div>
-    <div class="hero-h2">AIRDROP CAMPAIGN</div>
-    <p class="hero-sub">Join the mission. Complete quests, grow the ecosystem,<br>and earn <strong>GRAV</strong> rewards.</p>
-    <div class="pillars">
-      <div class="pillar">
-        <div class="pillar-circle">🌱</div>
-        <div><div class="pillar-name">Conserve</div><div class="pillar-sub">for the future</div></div>
-      </div>
-      <div class="pillar">
-        <div class="pillar-circle">🛡</div>
-        <div><div class="pillar-name">Verify</div><div class="pillar-sub">your actions</div></div>
-      </div>
-      <div class="pillar">
-        <div class="pillar-circle">🔺</div>
-        <div><div class="pillar-name">Tokenize</div><div class="pillar-sub">your impact</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="tree-container">
-      <div class="tree-glow-bg"></div>
-      <svg viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" width="380" height="380">
-        <!-- terrain grid -->
-        <path d="M10 340 Q95 310 190 325 Q285 340 370 305" stroke="#22c55e" stroke-width="0.9" fill="none" opacity="0.35"/>
-        <path d="M10 355 Q95 328 190 340 Q285 355 370 322" stroke="#22c55e" stroke-width="0.5" fill="none" opacity="0.25"/>
-        <line x1="50" y1="300" x2="50" y2="360" stroke="#22c55e" stroke-width="0.4" opacity="0.3"/>
-        <line x1="130" y1="300" x2="130" y2="360" stroke="#22c55e" stroke-width="0.4" opacity="0.3"/>
-        <line x1="190" y1="300" x2="190" y2="360" stroke="#22c55e" stroke-width="0.4" opacity="0.3"/>
-        <line x1="250" y1="300" x2="250" y2="360" stroke="#22c55e" stroke-width="0.4" opacity="0.3"/>
-        <line x1="330" y1="300" x2="330" y2="360" stroke="#22c55e" stroke-width="0.4" opacity="0.3"/>
-        <!-- glow base -->
-        <ellipse cx="190" cy="330" rx="80" ry="10" fill="#22c55e" opacity="0.12"/>
-        <!-- trunk -->
-        <path d="M175 325 Q178 270 182 220 Q186 170 184 120" stroke="#1a5c1a" stroke-width="20" fill="none" stroke-linecap="round"/>
-        <path d="M205 325 Q202 270 198 220 Q194 170 196 120" stroke="#1a5c1a" stroke-width="15" fill="none" stroke-linecap="round"/>
-        <path d="M190 320 Q190 270 190 220" stroke="#22701a" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.4"/>
-        <!-- canopy -->
-        <circle cx="190" cy="105" r="85" fill="#0d2e0d" opacity="0.97"/>
-        <circle cx="125" cy="130" r="60" fill="#0d2e0d" opacity="0.93"/>
-        <circle cx="255" cy="130" r="60" fill="#0d2e0d" opacity="0.93"/>
-        <circle cx="148" cy="70" r="50" fill="#0a240a"/>
-        <circle cx="232" cy="70" r="50" fill="#0a240a"/>
-        <circle cx="190" cy="50" r="44" fill="#081c08"/>
-        <!-- TOKEN COINS with real GRAVAX logo style -->
-        <!-- top left -->
-        <g transform="translate(135,62)">
-          <circle r="24" fill="#22c55e"/>
-          <circle r="20" fill="#16a34a"/>
-          <polygon points="0,-11 9,6 -9,6" fill="white" opacity="0.95"/>
-          <polygon points="0,-4 5,6 -5,6" fill="#16a34a"/>
-          <polygon points="0,3 7,14 -7,14" fill="white" opacity="0.88"/>
-          <polygon points="0,8 4,14 -4,14" fill="#16a34a"/>
-        </g>
-        <!-- top right -->
-        <g transform="translate(245,62)">
-          <circle r="22" fill="#22c55e"/>
-          <circle r="18" fill="#16a34a"/>
-          <polygon points="0,-10 8,5 -8,5" fill="white" opacity="0.95"/>
-          <polygon points="0,-4 4,5 -4,5" fill="#16a34a"/>
-          <polygon points="0,2 6,12 -6,12" fill="white" opacity="0.88"/>
-          <polygon points="0,7 3,12 -3,12" fill="#16a34a"/>
-        </g>
-        <!-- left -->
-        <g transform="translate(108,118)">
-          <circle r="26" fill="#22c55e"/>
-          <circle r="22" fill="#16a34a"/>
-          <polygon points="0,-12 10,7 -10,7" fill="white" opacity="0.95"/>
-          <polygon points="0,-5 5,7 -5,7" fill="#16a34a"/>
-          <polygon points="0,4 8,16 -8,16" fill="white" opacity="0.88"/>
-          <polygon points="0,9 4,16 -4,16" fill="#16a34a"/>
-        </g>
-        <!-- center -->
-        <g transform="translate(190,105)">
-          <circle r="28" fill="#22c55e"/>
-          <circle r="24" fill="#16a34a"/>
-          <polygon points="0,-13 11,8 -11,8" fill="white" opacity="0.95"/>
-          <polygon points="0,-5 6,8 -6,8" fill="#16a34a"/>
-          <polygon points="0,4 9,18 -9,18" fill="white" opacity="0.88"/>
-          <polygon points="0,10 5,18 -5,18" fill="#16a34a"/>
-        </g>
-        <!-- right -->
-        <g transform="translate(272,118)">
-          <circle r="24" fill="#22c55e"/>
-          <circle r="20" fill="#16a34a"/>
-          <polygon points="0,-11 9,6 -9,6" fill="white" opacity="0.95"/>
-          <polygon points="0,-4 5,6 -5,6" fill="#16a34a"/>
-          <polygon points="0,3 7,13 -7,13" fill="white" opacity="0.88"/>
-          <polygon points="0,8 4,13 -4,13" fill="#16a34a"/>
-        </g>
-        <!-- lower left -->
-        <g transform="translate(130,165)">
-          <circle r="22" fill="#22c55e"/>
-          <circle r="18" fill="#16a34a"/>
-          <polygon points="0,-10 8,5 -8,5" fill="white" opacity="0.95"/>
-          <polygon points="0,-4 4,5 -4,5" fill="#16a34a"/>
-          <polygon points="0,2 6,12 -6,12" fill="white" opacity="0.88"/>
-          <polygon points="0,7 3,12 -3,12" fill="#16a34a"/>
-        </g>
-        <!-- lower right -->
-        <g transform="translate(248,162)">
-          <circle r="21" fill="#22c55e"/>
-          <circle r="17" fill="#16a34a"/>
-          <polygon points="0,-9 8,5 -8,5" fill="white" opacity="0.95"/>
-          <polygon points="0,-3 4,5 -4,5" fill="#16a34a"/>
-          <polygon points="0,2 6,11 -6,11" fill="white" opacity="0.88"/>
-          <polygon points="0,6 3,11 -3,11" fill="#16a34a"/>
-        </g>
-        <!-- apples -->
-        <circle cx="168" cy="130" r="10" fill="#a3e635" opacity="0.92"/>
-        <path d="M168 120 Q172 115 176 118" stroke="#65a30d" stroke-width="1.5" fill="none"/>
-        <circle cx="200" cy="175" r="9" fill="#a3e635" opacity="0.88"/>
-        <path d="M200 166 Q204 161 208 164" stroke="#65a30d" stroke-width="1.5" fill="none"/>
-        <!-- big bottom coin -->
-        <g transform="translate(190,262)">
-          <circle r="36" fill="#22c55e" opacity="0.18"/>
-          <circle r="30" fill="#22c55e"/>
-          <circle r="25" fill="#16a34a"/>
-          <polygon points="0,-15 13,9 -13,9" fill="white" opacity="0.95"/>
-          <polygon points="0,-6 7,9 -7,9" fill="#16a34a"/>
-          <polygon points="0,5 10,20 -10,20" fill="white" opacity="0.88"/>
-          <polygon points="0,11 5,20 -5,20" fill="#16a34a"/>
-        </g>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="stat-item">
-    <div class="stat-icon">👥</div>
-    <div>
-      <div class="stat-label">Total Rewards</div>
-      <div class="stat-val">1,000,000 GRAV</div>
-    </div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-icon">🎁</div>
-    <div>
-      <div class="stat-label">Participants</div>
-      <div class="stat-val w" id="participantCount">—</div>
-    </div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-icon">🔗</div>
-    <div>
-      <div class="stat-label">Network</div>
-      <div class="stat-val w">AVALANCHE C-CHAIN</div>
-    </div>
-  </div>
-</div>
-
-<!-- QUESTS -->
-<section class="quests-section">
-  <div class="quests-header">
-    <div class="q-line"></div>
-    <div class="q-diamond"></div>
-    <span class="q-header-text">QUESTS</span>
-    <div class="q-diamond"></div>
-    <div class="q-line"></div>
-  </div>
-  <div class="quest-list" id="questList"></div>
-</section>
-
-<!-- AIRDROP BANNER -->
-<div class="airdrop-banner">
-  <div class="ab-glow"></div>
-  <div class="ab-icon-wrap">🎁</div>
-  <div class="ab-body">
-    <p>Complete all quests to be eligible for the</p>
-    <strong>GRAVAX AIRDROP!</strong>
-  </div>
-  <div class="ab-coins">
-    <div class="ab-coin">
-      <svg viewBox="0 0 100 100" width="26" height="26"><defs><radialGradient id="c1" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(#c1)"/><polygon points="50,20 72,62 28,62" fill="white" opacity="0.95"/><polygon points="50,32 65,62 35,62" fill="url(#c1)"/><polygon points="50,60 64,80 36,80" fill="white" opacity="0.9"/><polygon points="50,68 60,80 40,80" fill="url(#c1)"/></svg>
-    </div>
-    <div class="ab-coin">
-      <svg viewBox="0 0 100 100" width="22" height="22"><defs><radialGradient id="c2" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(#c2)"/><polygon points="50,20 72,62 28,62" fill="white" opacity="0.95"/><polygon points="50,32 65,62 35,62" fill="url(#c2)"/><polygon points="50,60 64,80 36,80" fill="white" opacity="0.9"/><polygon points="50,68 60,80 40,80" fill="url(#c2)"/></svg>
-    </div>
-    <div class="ab-coin">
-      <svg viewBox="0 0 100 100" width="18" height="18"><defs><radialGradient id="c3" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(#c3)"/><polygon points="50,20 72,62 28,62" fill="white" opacity="0.95"/><polygon points="50,32 65,62 35,62" fill="url(#c3)"/><polygon points="50,60 64,80 36,80" fill="white" opacity="0.9"/><polygon points="50,68 60,80 40,80" fill="url(#c3)"/></svg>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="gravax-logo">
-    <svg class="gravax-logo-svg" viewBox="0 0 100 100" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
-      <defs><radialGradient id="fLogo" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient></defs>
-      <circle cx="50" cy="50" r="50" fill="url(#fLogo)"/>
-      <polygon points="50,18 74,62 26,62" fill="white" opacity="0.95"/>
-      <polygon points="50,30 67,62 33,62" fill="url(#fLogo)"/>
-      <polygon points="50,58 64,82 36,82" fill="white" opacity="0.9"/>
-      <polygon points="50,67 60,82 40,82" fill="url(#fLogo)"/>
-    </svg>
-    <span class="gravax-logo-text">GRAVAX</span>
-  </div>
-  <div class="footer-center">
-    <span>Conserve</span> 🌱 —
-    <span>Verify</span> 🛡 —
-    <span>Tokenize</span> 🔺
-  </div>
-  <div class="footer-icons">
-    <a href="https://x.com/greenavax" target="_blank" class="f-icon">
-      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-    </a>
-    <a href="#" class="f-icon">
-      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-    </a>
-    <a href="#" class="f-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-    </a>
-  </div>
-</footer>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalBox"></div>
-</div>
-<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
 <script>
-const CONTRACT_ADDRESS = "0xc2174CFca51e6F2ab6501dab6875610C836196a7";
-const TOKEN_ADDRESS    = "0xBB370Fdb0c0B9c717ECAbC5949d461F97F64979f";
-const AVAX_CHAIN_ID    = "0xa86a";
+// ═══════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════
+const CONTRACT_ADDRESS = "0xB2eE32B742ad50C023362bCd8e1A8f23F6D96859";
 
-const CONTRACT_ABI = [
-  "function getUserProgress(address) view returns (bool[4])",
-  "function totalEarned(address) view returns (uint256)",
-  "function participantCount() view returns (uint256)"
-];
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function decimals() view returns (uint8)"
+const ABI = [
+  "function claimRank(uint8 rankIndex) payable",
+  "function getRanks(address user) view returns (bool[6])",
+  "function getRankPrice(uint8 rankIndex) view returns (uint256)",
+  "function totalContributed(address) view returns (uint256)"
 ];
 
-const QUESTS = [
-  {id:0, step:"STEP 1", name:"Follow @greenavax",                desc:"Follow our official X (Twitter) account.",                                                               reward:50,  xp:10,  icon:"X"},
-  {id:1, step:"STEP 2", name:"Connect wallet to Retro 9000",     desc:'Connect your wallet to <a href="https://retro9000.avax.network" target="_blank">https://retro9000.avax.network</a>', reward:100, xp:20, icon:"A"},
-  {id:2, step:"STEP 3", name:"Link your X account in Retro 9000",desc:"Link your X (Twitter) account in Retro 9000.",                                                            reward:100, xp:20,  icon:"🔗"},
-  {id:3, step:"STEP 4", name:"Paste your AVAX C chain address",  desc:"Submit your AVAX C-Chain wallet address.",                                                                reward:50,  xp:10,  icon:"👛"},
+// ═══════════════════════════════════════════════════
+//  RANK DEFINITIONS
+// ═══════════════════════════════════════════════════
+const RANKS = [
+  { name: "Sprout",             price: "0.01", desc: "First signs of impact. Welcome to the network." },
+  { name: "Conservationist",    price: "0.1",  desc: "Core active protector of the ecosystem." },
+  { name: "Forest Guardian",    price: "0.5",  desc: "Protecting larger ecosystems on-chain." },
+  { name: "Carbon Warden",      price: "1",    desc: "Climate defender. Earning rare multipliers." },
+  { name: "Earth Steward",      price: "10",   desc: "High-level caretaker of the green network." },
+  { name: "Legendary Sentinel", price: "50",   desc: "Mythic top-tier protector. Exclusive access." }
 ];
 
-const MODALS = {
-  0:`<button class="modal-close" onclick="closeModal()">×</button>
-     <h3>Follow @greenavax</h3>
-     <p>Follow the official GreenAvax X account. The owner will verify and send 50 GRAV to your wallet on-chain.</p>
-     <a class="ext-link" href="https://x.com/greenavax" target="_blank">↗ Open @greenavax on X</a>
-     <div class="pending-note">⏳ After following, the owner verifies and 50 GRAV is sent to your wallet automatically.</div>`,
-  1:`<button class="modal-close" onclick="closeModal()">×</button>
-     <h3>Connect wallet to Retro 9000</h3>
-     <p>Visit retro9000.avax.network and connect your Avalanche wallet to complete this quest.</p>
-     <a class="ext-link" href="https://retro9000.avax.network" target="_blank">↗ Open retro9000.avax.network</a>
-     <div class="pending-note">⏳ Owner verifies your connection and sends 100 GRAV to your wallet.</div>`,
-  2:`<button class="modal-close" onclick="closeModal()">×</button>
-     <h3>Link your X account in Retro 9000</h3>
-     <p>Authorize your X (Twitter) account inside Retro 9000 to complete this quest.</p>
-     <a class="ext-link" href="https://retro9000.avax.network" target="_blank">↗ Open retro9000.avax.network</a>
-     <div class="pending-note">⏳ Owner verifies your linked X account and sends 100 GRAV to your wallet.</div>`,
-  3:`<button class="modal-close" onclick="closeModal()">×</button>
-     <h3>Paste your AVAX C-Chain address</h3>
-     <p>Submit your Avalanche C-Chain wallet address (starts with 0x…) to complete this quest.</p>
-     <input class="inp" id="addrInp" placeholder="0x…" maxlength="42" style="margin-bottom:0;"/>
-     <div class="m-actions">
-       <button class="m-cancel" onclick="closeModal()">Cancel</button>
-       <button class="m-confirm" onclick="submitAddr()">Submit address</button>
-     </div>
-     <div class="pending-note">⏳ Owner verifies and sends 50 GRAV to your wallet.</div>`
-};
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let provider, signer, contract, userAddress;
+let claimedRanks = [false,false,false,false,false,false];
 
-let provider, signer, userAddress;
-let progress = [false,false,false,false];
-let earned = 0;
+// ═══════════════════════════════════════════════════
+//  AVAX C-CHAIN MAINNET
+// ═══════════════════════════════════════════════════
+const AVAX_CHAIN_ID = "0xa86a";
 
-const readProvider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc");
-
-async function loadParticipantCount(){
-  try {
-    const c = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, readProvider);
-    const n = await c.participantCount();
-    document.getElementById("participantCount").textContent = Number(n).toLocaleString();
-  } catch(e){ document.getElementById("participantCount").textContent = "—"; }
-}
-
-async function connectWallet(){
-  if(!window.ethereum){ showToast("No wallet found — install MetaMask or Core Wallet","err"); return; }
-  try {
-    await window.ethereum.request({method:"eth_requestAccounts"});
-    await switchToMainnet();
-    provider    = new ethers.providers.Web3Provider(window.ethereum);
-    signer      = provider.getSigner();
-    userAddress = await signer.getAddress();
-    const btn   = document.getElementById("connectBtn");
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15"><rect x="2" y="7" width="20" height="14" rx="2.5"/></svg> ${userAddress.slice(0,6)}…${userAddress.slice(-4)}`;
-    btn.classList.add("connected");
-    await loadUserData();
-    document.getElementById("walletBar").classList.add("show");
-    showToast("✓ Wallet connected");
-  } catch(e){ showToast(e.message,"err"); }
-}
-
-async function switchToMainnet(){
-  try {
-    await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:AVAX_CHAIN_ID}]});
-  } catch(e){
-    if(e.code===4902){
-      await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
-        chainId:AVAX_CHAIN_ID,chainName:"Avalanche C-Chain",
-        nativeCurrency:{name:"AVAX",symbol:"AVAX",decimals:18},
-        rpcUrls:["https://api.avax.network/ext/bc/C/rpc"],
-        blockExplorerUrls:["https://snowtrace.io"]
-      }]});
+async function ensureAvaxNetwork() {
+  const chainId = await window.ethereum.request({ method: "eth_chainId" });
+  if (chainId !== AVAX_CHAIN_ID) {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: AVAX_CHAIN_ID }]
+      });
+    } catch (err) {
+      if (err.code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: AVAX_CHAIN_ID,
+            chainName: "Avalanche C-Chain",
+            nativeCurrency: { name:"AVAX", symbol:"AVAX", decimals:18 },
+            rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+            blockExplorerUrls: ["https://snowtrace.io/"]
+          }]
+        });
+      } else { throw err; }
     }
   }
 }
 
-async function loadUserData(){
+// ═══════════════════════════════════════════════════
+//  CONNECT WALLET
+// ═══════════════════════════════════════════════════
+async function connectWallet() {
+  if (!window.ethereum) {
+    showStatus("No wallet detected. Install MetaMask or Core Wallet.", "error");
+    return;
+  }
   try {
-    const c  = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-    const tc = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
-    const [prog, earnedRaw, dec, balRaw] = await Promise.all([
-      c.getUserProgress(userAddress),
-      c.totalEarned(userAddress),
-      tc.decimals(),
-      tc.balanceOf(userAddress)
-    ]);
-    progress = prog.map(Boolean);
-    earned   = Math.round(parseFloat(ethers.utils.formatEther(earnedRaw)));
-    const bal = parseFloat(ethers.utils.formatUnits(balRaw, dec)).toFixed(2);
-    const done = progress.filter(Boolean).length;
-    document.getElementById("wbAddr").textContent   = userAddress.slice(0,6)+"…"+userAddress.slice(-4);
-    document.getElementById("wbBal").textContent    = bal+" GRAV";
-    document.getElementById("wbDone").textContent   = done+" / 4";
-    document.getElementById("wbEarned").textContent = earned+" GRAV";
-    render();
-  } catch(e){ showToast("Chain read error: "+e.message,"err"); }
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    await ensureAvaxNetwork();
+
+    provider    = new ethers.providers.Web3Provider(window.ethereum);
+    signer      = provider.getSigner();
+    userAddress = await signer.getAddress();
+    contract    = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+    const short = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+    const btn   = document.getElementById("connectBtn");
+    btn.textContent = "⬡ " + short;
+    btn.classList.add("connected");
+    document.getElementById("walletInfo").textContent = "AVAX C-CHAIN · MAINNET · CONNECTED";
+
+    await loadRanks();
+
+    window.ethereum.on("accountsChanged", () => location.reload());
+    window.ethereum.on("chainChanged",    () => location.reload());
+
+  } catch(err) {
+    showStatus(err.message || "Connection failed.", "error");
+  }
 }
 
-function questIcon(q, isDone){
-  if(isDone) return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
-  if(q.icon==="X") return `<svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
-  if(q.icon==="A") return `<svg viewBox="0 0 100 100" width="22" height="22"><defs><radialGradient id="qi" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(#qi)"/><polygon points="50,18 74,62 26,62" fill="white" opacity="0.95"/><polygon points="50,30 67,62 33,62" fill="url(#qi)"/><polygon points="50,58 64,82 36,82" fill="white" opacity="0.9"/><polygon points="50,67 60,82 40,82" fill="url(#qi)"/></svg>`;
-  return `<span style="font-size:20px">${q.icon}</span>`;
+// ═══════════════════════════════════════════════════
+//  LOAD RANKS FROM CONTRACT
+// ═══════════════════════════════════════════════════
+async function loadRanks() {
+  try {
+    claimedRanks = await contract.getRanks(userAddress);
+    renderGrid();
+  } catch(err) {
+    showStatus("Could not load ranks from contract.", "error");
+    renderGrid();
+  }
 }
 
-function render(){
-  const list = document.getElementById("questList");
-  list.innerHTML = "";
-  QUESTS.forEach((q,i)=>{
-    const isDone   = progress[q.id];
-    const isLocked = !userAddress || (i>0 && !progress[QUESTS[i-1].id]);
+// ═══════════════════════════════════════════════════
+//  RENDER RANK GRID
+// ═══════════════════════════════════════════════════
+function renderGrid() {
+  const grid = document.getElementById("rankGrid");
+  grid.innerHTML = "";
+
+  RANKS.forEach((rank, i) => {
+    const claimed  = claimedRanks[i];
+    const disabled = claimed || !userAddress;
+
     const card = document.createElement("div");
-    card.className = "quest-card"+(isDone?" done":"")+(isLocked?" locked":"");
-    card.onclick   = ()=>{ if(!isDone && !isLocked) openModal(MODALS[q.id]); else if(!userAddress) openModal(walletModal()); };
+    card.className = "rank-card" + (claimed ? " claimed-card" : "");
+    card.id = `card-${i}`;
+
     card.innerHTML = `
-      <div class="q-icon-wrap"><div class="q-icon-inner">${questIcon(q, isDone)}</div></div>
-      <div class="q-body">
-        <div class="q-name">${q.name}</div>
-        <div class="q-desc">${q.desc}</div>
-        <span class="q-step-badge">${q.step}</span>
-      </div>
-      <div class="q-chevron">${isDone?"✓":"›"}</div>
-      <div class="q-reward-box">
-        <div class="qr-label">REWARD</div>
-        <div class="qr-amount">${q.reward}</div>
-        <div class="qr-unit">GRAV</div>
-        <div class="qr-xp">XP +${q.xp}</div>
-      </div>`;
-    list.appendChild(card);
+      <div class="rank-number">RANK 0${i+1}</div>
+      <div class="rank-name">${rank.name}</div>
+      <div class="rank-price">${rank.price} AVAX</div>
+      <div class="rank-desc">${rank.desc}</div>
+      <button
+        class="claim-btn ${claimed ? 'claimed' : 'unclaimed'}"
+        id="btn-${i}"
+        onclick="claimRank(${i})"
+        ${disabled ? 'disabled' : ''}
+      >${claimed ? '✓ CLAIMED' : 'GET RANK'}</button>
+    `;
+
+    grid.appendChild(card);
   });
 }
 
-function walletModal(){
-  return `<button class="modal-close" onclick="closeModal()">×</button>
-    <h3>Connect your wallet</h3>
-    <p>Connect an Avalanche wallet to start completing quests and earning GRAV.</p>
-    <div class="w-opt" onclick="closeModal();connectWallet()"><div class="w-logo">🔺</div><div><div class="w-name">Core Wallet</div><div class="w-sub">Avalanche native</div></div></div>
-    <div class="w-opt" onclick="closeModal();connectWallet()"><div class="w-logo">🦊</div><div><div class="w-name">MetaMask</div><div class="w-sub">EVM · Avalanche C-Chain</div></div></div>
-    <div class="w-opt" onclick="closeModal();connectWallet()"><div class="w-logo">🔗</div><div><div class="w-name">WalletConnect</div><div class="w-sub">Multi-wallet</div></div></div>`;
+// ═══════════════════════════════════════════════════
+//  CLAIM RANK
+// ═══════════════════════════════════════════════════
+async function claimRank(rankIndex) {
+  if (!contract) { showStatus("Connect your wallet first.", "error"); return; }
+
+  const rank  = RANKS[rankIndex];
+  const value = ethers.utils.parseEther(rank.price);
+
+  try {
+    setLoading(true);
+    const tx = await contract.claimRank(rankIndex, { value });
+    showStatus("Transaction sent · Waiting for confirmation...", "");
+    await tx.wait();
+    showStatus(`${rank.name} claimed successfully!`, "success");
+    claimedRanks[rankIndex] = true;
+    renderGrid();
+  } catch(err) {
+    const msg = err?.reason || err?.message || "Transaction failed.";
+    showStatus(msg.length > 90 ? msg.slice(0,90)+"…" : msg, "error");
+  } finally {
+    setLoading(false);
+  }
 }
 
-function submitAddr(){
-  const v = document.getElementById("addrInp")?.value?.trim();
-  if(!v||!v.startsWith("0x")||v.length<10){ document.getElementById("addrInp").style.borderColor="#e24b4a"; return; }
-  closeModal();
-  showToast("Address submitted — awaiting owner verification ⏳");
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+function setLoading(on) {
+  document.getElementById("loadingOverlay").classList.toggle("active", on);
 }
 
-function openModal(html){ document.getElementById("modalBox").innerHTML=html; document.getElementById("modalOverlay").classList.add("open"); }
-function closeModal(){ document.getElementById("modalOverlay").classList.remove("open"); }
-function showToast(msg,type=""){
-  const t=document.getElementById("toast");
-  document.getElementById("toastMsg").textContent=msg;
-  t.className="toast"+(type==="err"?" err":"");
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3500);
+let _st;
+function showStatus(msg, type) {
+  const el = document.getElementById("statusMsg");
+  el.textContent = msg;
+  el.className   = "show" + (type ? " "+type : "");
+  clearTimeout(_st);
+  _st = setTimeout(() => { el.className = ""; }, 5000);
 }
 
-document.getElementById("modalOverlay").addEventListener("click",function(e){if(e.target===this)closeModal();});
+// ═══════════════════════════════════════════════════
+//  COSMIC GREEN WEAVE CANVAS
+// ═══════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById("bgCanvas");
+  const ctx    = canvas.getContext("2d");
 
-// Init
-loadParticipantCount();
-setInterval(loadParticipantCount, 30000);
-render();
+  let W, H, nodes = [], frame = 0;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initNodes() {
+    nodes = [];
+    const count = Math.floor((W * H) / 9000);
+    for (let i = 0; i < count; i++) {
+      nodes.push({
+        x:  Math.random() * W,
+        y:  Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r:  Math.random() * 1.5 + 0.5,
+        hue: Math.random() > 0.6 ? 145 : 48  // green or gold
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // subtle radial glow center
+    const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.55);
+    grd.addColorStop(0,   "rgba(0,160,80,0.10)");
+    grd.addColorStop(0.5, "rgba(0,100,40,0.04)");
+    grd.addColorStop(1,   "rgba(0,0,0,0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    // connections
+    const DIST = 130;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i+1; j < nodes.length; j++) {
+        const dx   = nodes[i].x - nodes[j].x;
+        const dy   = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < DIST) {
+          const alpha = (1 - dist/DIST) * 0.25;
+          const hue = (nodes[i].hue + nodes[j].hue) / 2;
+          ctx.strokeStyle = `hsla(${hue}, 75%, 35%, ${alpha})`;
+          ctx.lineWidth   = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // nodes
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+      ctx.fillStyle = `hsla(${n.hue}, 80%, 35%, 0.55)`;
+      ctx.fill();
+
+      // move
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    });
+
+    frame++;
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initNodes();
+  draw();
+  window.addEventListener("resize", () => { resize(); initNodes(); });
+})();
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+renderGrid();
 </script>
 </body>
 </html>
