@@ -10,23 +10,40 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <style>
     :root {
+      --green:       #00ff7f;
+      --green-dim:   #00c45e;
+      --green-dark:  #004d26;
+      --gold:        #d4a017;
+      --gold-light:  #f5c842;
+      --gold-bright: #ffe066;
+      --red:         #ff3b3b;
+      --red-dim:     #c42a2a;
+      --bg:          #030a05;
+      --card:        rgba(8, 22, 12, 0.85);
+      --border:      rgba(0,255,127,0.12);
+      --border-gold: rgba(212,160,23,0.35);
+      --text:        #cce8d4;
+      --muted:       #3d6b4a;
+      --font-head:   'Orbitron', sans-serif;
+      --font-body:   'Nunito Sans', sans-serif;
+      --font-label:  'Rajdhani', sans-serif;
+    }
+
+    /* ── LIGHT THEME OVERRIDES ── */
+    body.light {
       --green:       #00a855;
       --green-dim:   #007a3d;
-      --green-dark:  #004d26;
       --gold:        #b8860b;
       --gold-light:  #d4a017;
       --gold-bright: #c8920f;
       --red:         #e02020;
       --red-dim:     #b01818;
       --bg:          #e8f5ec;
-      --card:        rgba(255, 255, 255, 0.82);
+      --card:        rgba(255,255,255,0.82);
       --border:      rgba(0,140,70,0.18);
       --border-gold: rgba(180,130,10,0.35);
       --text:        #0d2e18;
       --muted:       #3a7a50;
-      --font-head:   'Orbitron', sans-serif;
-      --font-body:   'Nunito Sans', sans-serif;
-      --font-label:  'Rajdhani', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,10 +87,29 @@
       padding: 0 20px;
     }
 
-    /* ═══════════════════════════════════════
-       TOP BADGE
-    ═══════════════════════════════════════ */
-    .top-badge {
+    /* ── THEME TOGGLE ── */
+    #themeToggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 300;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-label);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+      text-transform: uppercase;
+    }
+    #themeToggle:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
       margin-top: 36px;
       font-family: var(--font-label);
       font-size: 11px;
@@ -432,11 +468,21 @@
     }
 
     .social-btn.twitter {
+      border-color: rgba(255,255,255,0.2);
+      color: #e0e0e0;
+      background: rgba(255,255,255,0.03);
+    }
+    .social-btn.twitter:hover {
+      border-color: #fff;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    body.light .social-btn.twitter {
       border-color: rgba(0,0,0,0.2);
       color: #1a1a1a;
       background: rgba(0,0,0,0.04);
     }
-    .social-btn.twitter:hover {
+    body.light .social-btn.twitter:hover {
       border-color: #000;
       background: rgba(0,0,0,0.08);
       color: #000;
@@ -475,7 +521,7 @@
       bottom: 28px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(232,245,236,0.97);
+      background: var(--card);
       border: 1px solid var(--border);
       color: var(--text);
       font-family: var(--font-label);
@@ -502,7 +548,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(232,245,236,0.92);
+      background: rgba(3,10,5,0.88);
       z-index: 150;
       align-items: center;
       justify-content: center;
@@ -532,20 +578,21 @@
 </head>
 <body>
 
-<!-- ═══ BACKGROUND CANVAS ═══ -->
+<!-- ═══ THEME TOGGLE ═══ -->
+<button id="themeToggle" onclick="toggleTheme()">☀ LIGHT</button>
+
 <canvas id="bgCanvas"></canvas>
 
 <div class="content">
 
-  <!-- ═══ TOP BADGE ═══ -->
-  <div class="top-badge">AVAX C-CHAIN · MAINNET · ON-CHAIN RANKS</div>
+
 
   <!-- ═══ PROOF OF CONSERVATION ═══ -->
   <div class="poc-label">⬡ PROOF OF CONSERVATION ⬡</div>
 
   <!-- ═══ HERO TITLE ═══ -->
   <div class="hero-title">GREENAVAX</div>
-  <div class="hero-sub">Guardian Rank Protocol</div>
+
 
   <!-- ═══ CONNECT WALLET ═══ -->
   <button id="connectBtn" onclick="connectWallet()">⬡ CONNECT WALLET</button>
@@ -788,6 +835,14 @@ function showStatus(msg, type) {
 }
 
 // ═══════════════════════════════════════════════════
+//  THEME TOGGLE
+// ═══════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.body.classList.toggle("light");
+  document.getElementById("themeToggle").textContent = isLight ? "☾ DARK" : "☀ LIGHT";
+}
+
+// ═══════════════════════════════════════════════════
 //  COSMIC GREEN WEAVE CANVAS
 // ═══════════════════════════════════════════════════
 (function() {
@@ -818,12 +873,18 @@ function showStatus(msg, type) {
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    const isLight = document.body.classList.contains("light");
 
-    // subtle radial glow center
+    // radial glow
     const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.55);
-    grd.addColorStop(0,   "rgba(0,160,80,0.10)");
-    grd.addColorStop(0.5, "rgba(0,100,40,0.04)");
-    grd.addColorStop(1,   "rgba(0,0,0,0)");
+    if (isLight) {
+      grd.addColorStop(0,   "rgba(0,160,80,0.10)");
+      grd.addColorStop(0.5, "rgba(0,100,40,0.04)");
+    } else {
+      grd.addColorStop(0,   "rgba(0,80,30,0.18)");
+      grd.addColorStop(0.5, "rgba(0,40,15,0.06)");
+    }
+    grd.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, W, H);
 
@@ -835,9 +896,10 @@ function showStatus(msg, type) {
         const dy   = nodes[i].y - nodes[j].y;
         const dist = Math.sqrt(dx*dx + dy*dy);
         if (dist < DIST) {
-          const alpha = (1 - dist/DIST) * 0.25;
-          const hue = (nodes[i].hue + nodes[j].hue) / 2;
-          ctx.strokeStyle = `hsla(${hue}, 75%, 35%, ${alpha})`;
+          const alpha = (1 - dist/DIST) * (isLight ? 0.28 : 0.18);
+          const hue   = (nodes[i].hue + nodes[j].hue) / 2;
+          const lum   = isLight ? 35 : 50;
+          ctx.strokeStyle = `hsla(${hue}, 80%, ${lum}%, ${alpha})`;
           ctx.lineWidth   = 0.7;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -851,10 +913,9 @@ function showStatus(msg, type) {
     nodes.forEach(n => {
       ctx.beginPath();
       ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-      ctx.fillStyle = `hsla(${n.hue}, 80%, 35%, 0.55)`;
+      const lum = isLight ? 35 : 60;
+      ctx.fillStyle = `hsla(${n.hue}, 90%, ${lum}%, 0.55)`;
       ctx.fill();
-
-      // move
       n.x += n.vx;
       n.y += n.vy;
       if (n.x < 0 || n.x > W) n.vx *= -1;
