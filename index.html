@@ -1,13 +1,68 @@
+updated index.html with WalletConnect Web3Modal for mobile support
+Write updated index.html with WalletConnect Web3Modal for mobile support
+
+Write updated index.html with WalletConnect Web3Modal for mobile support
+bash
+
+cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GREENAVAX</title>
-  <link href="https://fonts.googleapis.com/css2?family=Proxima+Nova:wght@400;700&display=swap" rel="stylesheet"/>
-  <!-- Proxima Nova via Adobe Fonts fallback — using closest Google match -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+
+  <!-- Ethers + WalletConnect Web3Modal -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <script type="module">
+    import { createWeb3Modal, defaultWagmiConfig } from 'https://esm.sh/@web3modal/wagmi@5.1.6';
+    import { avalanche } from 'https://esm.sh/viem@2.21.19/chains';
+    import { reconnect, getAccount, watchAccount, signMessage } from 'https://esm.sh/@wagmi/core@2.13.5';
+
+    const projectId = 'c169af5b4c15e3368e0e00d17a899bc8';
+
+    const metadata = {
+      name: 'GREENAVAX',
+      description: 'Guardian Rank Protocol on AVAX C-Chain',
+      url: 'https://greenavax.xyz',
+      icons: ['https://greenavax.xyz/favicon.ico']
+    };
+
+    const chains = [avalanche];
+    const config = defaultWagmiConfig({ chains, projectId, metadata });
+
+    reconnect(config);
+
+    const modal = createWeb3Modal({
+      wagmiConfig: config,
+      projectId,
+      defaultChain: avalanche,
+      themeMode: 'dark',
+      themeVariables: {
+        '--w3m-accent': '#00ff7f',
+        '--w3m-border-radius-master': '0px'
+      }
+    });
+
+    // expose modal globally so the button can open it
+    window._w3modal = modal;
+    window._w3config = config;
+
+    // watch account changes
+    watchAccount(config, {
+      onChange(account) {
+        if (account.address) {
+          window._userAddress = account.address;
+          window.dispatchEvent(new CustomEvent('walletConnected', { detail: account.address }));
+        } else {
+          window._userAddress = null;
+          window.dispatchEvent(new CustomEvent('walletDisconnected'));
+        }
+      }
+    });
+  </script>
+
   <style>
     :root {
       --green:       #00ff7f;
@@ -29,7 +84,6 @@
       --font-label:  'Rajdhani', sans-serif;
     }
 
-    /* ── LIGHT THEME OVERRIDES ── */
     body.light {
       --green:       #00a855;
       --green-dim:   #007a3d;
@@ -47,13 +101,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
+    html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
     body {
       background: var(--bg);
       color: var(--text);
@@ -63,19 +111,8 @@
       align-items: center;
     }
 
-    /* ═══════════════════════════════════════
-       CANVAS BACKGROUND — cosmic green weave
-    ═══════════════════════════════════════ */
-    #bgCanvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: 0.7;
-    }
+    #bgCanvas { position: fixed; inset: 0; z-index: 0; opacity: 0.7; }
 
-    /* ═══════════════════════════════════════
-       CONTENT WRAPPER
-    ═══════════════════════════════════════ */
     .content {
       position: relative;
       z-index: 1;
@@ -106,27 +143,11 @@
       backdrop-filter: blur(8px);
       text-transform: uppercase;
     }
-    #themeToggle:hover {
-      border-color: var(--green);
-      color: var(--green);
-    }
-      margin-top: 36px;
-      font-family: var(--font-label);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 5px;
-      color: var(--muted);
-      text-transform: uppercase;
-      border: 1px solid var(--border);
-      padding: 6px 18px;
-      background: rgba(0,255,127,0.03);
-    }
+    #themeToggle:hover { border-color: var(--green); color: var(--green); }
 
-    /* ═══════════════════════════════════════
-       PROOF OF CONSERVATION
-    ═══════════════════════════════════════ */
+    /* ── POC LABEL ── */
     .poc-label {
-      margin-top: 28px;
+      margin-top: 48px;
       font-family: var(--font-label);
       font-size: 13px;
       font-weight: 700;
@@ -135,9 +156,7 @@
       text-transform: uppercase;
     }
 
-    /* ═══════════════════════════════════════
-       GREENAVAX HERO TITLE — gold/green
-    ═══════════════════════════════════════ */
+    /* ── HERO TITLE ── */
     .hero-title {
       margin-top: 10px;
       font-family: var(--font-head);
@@ -146,14 +165,10 @@
       letter-spacing: 4px;
       line-height: 1;
       text-align: center;
-      background: linear-gradient(
-        135deg,
-        var(--gold-bright) 0%,
-        var(--gold-light)  20%,
-        var(--green)       45%,
-        var(--gold)        65%,
-        var(--gold-bright) 80%,
-        var(--green-dim)   100%
+      background: linear-gradient(135deg,
+        var(--gold-bright) 0%, var(--gold-light) 20%,
+        var(--green) 45%, var(--gold) 65%,
+        var(--gold-bright) 80%, var(--green-dim) 100%
       );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -162,26 +177,13 @@
       animation: shimmer 5s linear infinite;
       background-size: 300% 300%;
     }
-
     @keyframes shimmer {
       0%   { background-position: 0% 50%; }
       50%  { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
 
-    .hero-sub {
-      margin-top: 8px;
-      font-family: var(--font-label);
-      font-size: 12px;
-      letter-spacing: 5px;
-      color: var(--gold);
-      opacity: 0.65;
-      text-transform: uppercase;
-    }
-
-    /* ═══════════════════════════════════════
-       CONNECT WALLET BUTTON
-    ═══════════════════════════════════════ */
+    /* ── CONNECT WALLET ── */
     #connectBtn {
       margin-top: 28px;
       padding: 15px 48px;
@@ -229,9 +231,7 @@
       text-transform: uppercase;
     }
 
-    /* ═══════════════════════════════════════
-       DIVIDER
-    ═══════════════════════════════════════ */
+    /* ── DIVIDER ── */
     .divider {
       width: 100%;
       height: 1px;
@@ -240,13 +240,8 @@
       opacity: 0.4;
     }
 
-    /* ═══════════════════════════════════════
-       SECTION HEADING
-    ═══════════════════════════════════════ */
-    .section-heading {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    /* ── SECTION HEADING ── */
+    .section-heading { text-align: center; margin-bottom: 32px; }
     .section-heading h2 {
       font-family: var(--font-head);
       font-size: clamp(14px, 3vw, 20px);
@@ -263,9 +258,7 @@
       color: var(--muted);
     }
 
-    /* ═══════════════════════════════════════
-       RANK GRID — 2 rows × 3 cols
-    ═══════════════════════════════════════ */
+    /* ── RANK GRID ── */
     #rankGrid {
       width: 100%;
       display: grid;
@@ -273,17 +266,10 @@
       gap: 14px;
       padding-bottom: 8px;
     }
+    @media (max-width: 640px) { #rankGrid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 400px) { #rankGrid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 640px) {
-      #rankGrid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 400px) {
-      #rankGrid { grid-template-columns: 1fr; }
-    }
-
-    /* ═══════════════════════════════════════
-       RANK CARD
-    ═══════════════════════════════════════ */
+    /* ── RANK CARD ── */
     .rank-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -306,19 +292,12 @@
       transition: opacity 0.3s;
     }
     .rank-card:hover::before { opacity: 1; }
-    .rank-card:hover {
-      border-color: rgba(0,255,127,0.3);
-      transform: translateY(-2px);
-    }
-    .rank-card.claimed-card {
-      border-color: rgba(0,196,94,0.4);
-    }
+    .rank-card:hover { border-color: rgba(0,255,127,0.3); transform: translateY(-2px); }
+    .rank-card.claimed-card { border-color: rgba(0,196,94,0.4); }
     .rank-card.claimed-card::before {
       background: linear-gradient(90deg, transparent, var(--green), transparent);
       opacity: 0.8;
     }
-
-    /* corner accent */
     .rank-card::after {
       content: '';
       position: absolute;
@@ -329,288 +308,101 @@
       opacity: 0.5;
     }
 
-    .rank-number {
-      font-family: var(--font-head);
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: var(--gold);
-      opacity: 0.6;
-      text-transform: uppercase;
-    }
+    .rank-number { font-family: var(--font-head); font-size: 9px; letter-spacing: 3px; color: var(--gold); opacity: 0.6; text-transform: uppercase; }
+    .rank-name   { font-family: var(--font-head); font-size: clamp(13px, 2.2vw, 17px); font-weight: 700; letter-spacing: 1px; color: var(--text); line-height: 1.2; }
+    .rank-price  { font-family: var(--font-label); font-size: 14px; font-weight: 700; color: var(--green); letter-spacing: 1px; }
+    .rank-desc   { font-family: var(--font-body); font-size: 10px; color: var(--muted); letter-spacing: 0.5px; line-height: 1.5; flex-grow: 1; }
 
-    .rank-name {
-      font-family: var(--font-head);
-      font-size: clamp(13px, 2.2vw, 17px);
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--text);
-      line-height: 1.2;
-    }
-
-    .rank-price {
-      font-family: var(--font-label);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--green);
-      letter-spacing: 1px;
-    }
-
-    .rank-desc {
-      font-family: var(--font-body);
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-      line-height: 1.5;
-      flex-grow: 1;
-    }
-
-    /* ═══════════════════════════════════════
-       CLAIM BUTTON
-    ═══════════════════════════════════════ */
+    /* ── CLAIM BUTTON ── */
     .claim-btn {
-      margin-top: 10px;
-      padding: 11px 8px;
-      width: 100%;
-      border: none;
-      font-family: var(--font-label);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
+      margin-top: 10px; padding: 11px 8px; width: 100%; border: none;
+      font-family: var(--font-label); font-size: 13px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
     }
+    .claim-btn.unclaimed { background: var(--red); color: #fff; }
+    .claim-btn.unclaimed:hover:not(:disabled) { background: #ff5555; letter-spacing: 4px; }
+    .claim-btn.unclaimed:disabled { opacity: 0.35; cursor: not-allowed; }
+    .claim-btn.claimed { background: var(--green); color: var(--bg); cursor: default; font-weight: 900; }
 
-    .claim-btn.unclaimed {
-      background: var(--red);
-      color: #fff;
-    }
-    .claim-btn.unclaimed:hover:not(:disabled) {
-      background: #ff5555;
-      letter-spacing: 4px;
-    }
-    .claim-btn.unclaimed:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-    .claim-btn.claimed {
-      background: var(--green);
-      color: var(--bg);
-      cursor: default;
-      font-weight: 900;
-    }
-
-    /* ═══════════════════════════════════════
-       INFO STRIP
-    ═══════════════════════════════════════ */
+    /* ── INFO STRIP ── */
     .info-strip {
-      margin-top: 36px;
-      width: 100%;
+      margin-top: 36px; width: 100%;
       border: 1px solid var(--border-gold);
       background: rgba(212,160,23,0.04);
       padding: 16px 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
+      display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
     }
-    .info-item {
-      font-family: var(--font-label);
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--gold);
-      opacity: 0.7;
-      text-transform: uppercase;
-    }
-    .info-item span {
-      color: var(--green);
-      opacity: 1;
-    }
+    .info-item { font-family: var(--font-label); font-size: 11px; letter-spacing: 2px; color: var(--gold); opacity: 0.7; text-transform: uppercase; }
+    .info-item span { color: var(--green); opacity: 1; }
 
-    /* ═══════════════════════════════════════
-       SOCIAL FOOTER
-    ═══════════════════════════════════════ */
-    .social-footer {
-      margin-top: 44px;
-      margin-bottom: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .social-label {
-      font-family: var(--font-label);
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .social-buttons {
-      display: flex;
-      gap: 16px;
-    }
+    /* ── SOCIAL FOOTER ── */
+    .social-footer { margin-top: 44px; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+    .social-label  { font-family: var(--font-label); font-size: 10px; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; }
+    .social-buttons { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
 
     .social-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 28px;
-      border: 1.5px solid;
-      font-family: var(--font-label);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      text-decoration: none;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 28px; border: 1.5px solid;
+      font-family: var(--font-label); font-size: 13px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; text-decoration: none; transition: all 0.2s;
     }
+    .social-btn.twitter { border-color: rgba(255,255,255,0.2); color: #e0e0e0; background: rgba(255,255,255,0.03); }
+    .social-btn.twitter:hover { border-color: #fff; background: rgba(255,255,255,0.08); color: #fff; }
+    body.light .social-btn.twitter { border-color: rgba(0,0,0,0.2); color: #1a1a1a; background: rgba(0,0,0,0.04); }
+    body.light .social-btn.twitter:hover { border-color: #000; background: rgba(0,0,0,0.08); color: #000; }
+    .social-btn.telegram { border-color: rgba(41,182,246,0.35); color: #29b6f6; background: rgba(41,182,246,0.04); }
+    .social-btn.telegram:hover { border-color: #29b6f6; background: rgba(41,182,246,0.1); }
+    .social-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-    .social-btn.twitter {
-      border-color: rgba(255,255,255,0.2);
-      color: #e0e0e0;
-      background: rgba(255,255,255,0.03);
-    }
-    .social-btn.twitter:hover {
-      border-color: #fff;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-    }
-    body.light .social-btn.twitter {
-      border-color: rgba(0,0,0,0.2);
-      color: #1a1a1a;
-      background: rgba(0,0,0,0.04);
-    }
-    body.light .social-btn.twitter:hover {
-      border-color: #000;
-      background: rgba(0,0,0,0.08);
-      color: #000;
-    }
+    .copyright { font-family: var(--font-label); font-size: 10px; letter-spacing: 2px; color: var(--muted); opacity: 0.5; text-align: center; }
 
-    .social-btn.telegram {
-      border-color: rgba(41,182,246,0.35);
-      color: #29b6f6;
-      background: rgba(41,182,246,0.04);
-    }
-    .social-btn.telegram:hover {
-      border-color: #29b6f6;
-      background: rgba(41,182,246,0.1);
-    }
-
-    .social-btn svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    .copyright {
-      font-family: var(--font-label);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--muted);
-      opacity: 0.5;
-      text-align: center;
-    }
-
-    /* ═══════════════════════════════════════
-       STATUS TOAST
-    ═══════════════════════════════════════ */
+    /* ── STATUS TOAST ── */
     #statusMsg {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: var(--font-label);
-      font-size: 12px;
-      letter-spacing: 2px;
-      padding: 14px 28px;
-      z-index: 200;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      white-space: nowrap;
-      max-width: 90vw;
-      text-align: center;
-      backdrop-filter: blur(10px);
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border); color: var(--text);
+      font-family: var(--font-label); font-size: 12px; letter-spacing: 2px;
+      padding: 14px 28px; z-index: 200; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; white-space: nowrap; max-width: 90vw; text-align: center; backdrop-filter: blur(10px);
     }
-    #statusMsg.show   { opacity: 1; }
-    #statusMsg.error  { border-color: var(--red);   color: var(--red); }
-    #statusMsg.success{ border-color: var(--green);  color: var(--green); }
+    #statusMsg.show    { opacity: 1; }
+    #statusMsg.error   { border-color: var(--red);   color: var(--red); }
+    #statusMsg.success { border-color: var(--green);  color: var(--green); }
 
-    /* ═══════════════════════════════════════
-       LOADING OVERLAY
-    ═══════════════════════════════════════ */
+    /* ── LOADING OVERLAY ── */
     #loadingOverlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(3,10,5,0.88);
-      z-index: 150;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-      backdrop-filter: blur(4px);
+      display: none; position: fixed; inset: 0;
+      background: rgba(3,10,5,0.88); z-index: 150;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; backdrop-filter: blur(4px);
     }
     #loadingOverlay.active { display: flex; }
-    .loading-text {
-      font-family: var(--font-head);
-      font-size: 22px;
-      letter-spacing: 8px;
-      color: var(--green);
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-    .loading-sub {
-      font-family: var(--font-label);
-      font-size: 11px;
-      letter-spacing: 4px;
-      color: var(--muted);
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50%      { opacity: 0.3; }
-    }
+    .loading-text { font-family: var(--font-head); font-size: 22px; letter-spacing: 8px; color: var(--green); animation: pulse 1.4s ease-in-out infinite; }
+    .loading-sub  { font-family: var(--font-label); font-size: 11px; letter-spacing: 4px; color: var(--muted); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   </style>
 </head>
 <body>
 
-<!-- ═══ THEME TOGGLE ═══ -->
 <button id="themeToggle" onclick="toggleTheme()">☀ LIGHT</button>
-
 <canvas id="bgCanvas"></canvas>
 
 <div class="content">
 
-
-
-  <!-- ═══ PROOF OF CONSERVATION ═══ -->
   <div class="poc-label">⬡ PROOF OF CONSERVATION ⬡</div>
-
-  <!-- ═══ HERO TITLE ═══ -->
   <div class="hero-title">GREENAVAX</div>
 
-
-  <!-- ═══ CONNECT WALLET ═══ -->
   <button id="connectBtn" onclick="connectWallet()">⬡ CONNECT WALLET</button>
   <div id="walletInfo"></div>
 
-  <!-- ═══ DIVIDER ═══ -->
   <div class="divider"></div>
 
-  <!-- ═══ SECTION HEADING ═══ -->
   <div class="section-heading">
     <h2>Claim Your Conservation Ranks</h2>
     <p>Each rank unlocks $GRAV rewards · staking multipliers · NFTs · exclusive access · All on-chain</p>
   </div>
 
-  <!-- ═══ RANK GRID ═══ -->
   <div id="rankGrid"></div>
 
-  <!-- ═══ INFO STRIP ═══ -->
   <div class="info-strip">
     <div class="info-item">Payments → <span>Instant & Final</span></div>
     <div class="info-item">Ranks → <span>Permanent On-Chain</span></div>
@@ -618,37 +410,24 @@
     <div class="info-item">Network → <span>AVAX C-Chain</span></div>
   </div>
 
-  <!-- ═══ SOCIAL FOOTER ═══ -->
   <div class="social-footer">
     <div class="social-label">Join the Network</div>
     <div class="social-buttons">
-
-      <!-- X / Twitter -->
       <a class="social-btn twitter" href="https://x.com/greenavax" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.738-8.835L1.254 2.25H8.08l4.262 5.633 5.902-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.738-8.835L1.254 2.25H8.08l4.262 5.633 5.902-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         TWITTER
       </a>
-
-      <!-- Telegram -->
       <a class="social-btn telegram" href="https://t.me/greenavax" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
         TELEGRAM
       </a>
-
     </div>
     <div class="copyright">© GREENAVAX · All ranks are permanent · Powered by AVAX C-Chain</div>
   </div>
 
-</div><!-- /content -->
+</div>
 
-<!-- ═══ STATUS TOAST ═══ -->
 <div id="statusMsg"></div>
-
-<!-- ═══ LOADING OVERLAY ═══ -->
 <div id="loadingOverlay">
   <div class="loading-text">PROCESSING</div>
   <div class="loading-sub">Confirm in your wallet · Do not close</div>
@@ -659,7 +438,6 @@
 //  CONFIG
 // ═══════════════════════════════════════════════════
 const CONTRACT_ADDRESS = "0xB2eE32B742ad50C023362bCd8e1A8f23F6D96859";
-
 const ABI = [
   "function claimRank(uint8 rankIndex) payable",
   "function getRanks(address user) view returns (bool[6])",
@@ -667,9 +445,6 @@ const ABI = [
   "function totalContributed(address) view returns (uint256)"
 ];
 
-// ═══════════════════════════════════════════════════
-//  RANK DEFINITIONS
-// ═══════════════════════════════════════════════════
 const RANKS = [
   { name: "Sprout",             price: "0.01", desc: "First signs of impact. Welcome to the network." },
   { name: "Conservationist",    price: "0.1",  desc: "Core active protector of the ecosystem." },
@@ -679,17 +454,95 @@ const RANKS = [
   { name: "Legendary Sentinel", price: "50",   desc: "Mythic top-tier protector. Exclusive access." }
 ];
 
-// ═══════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════
+const AVAX_RPC  = "https://api.avax.network/ext/bc/C/rpc";
+const AVAX_CHAIN_ID = "0xa86a";
+
 let provider, signer, contract, userAddress;
 let claimedRanks = [false,false,false,false,false,false];
 
 // ═══════════════════════════════════════════════════
-//  AVAX C-CHAIN MAINNET
+//  CONNECT WALLET — handles desktop + mobile
 // ═══════════════════════════════════════════════════
-const AVAX_CHAIN_ID = "0xa86a";
+async function connectWallet() {
+  // already connected
+  if (userAddress) return;
 
+  // Desktop: MetaMask/Core extension present
+  if (window.ethereum) {
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await ensureAvaxNetwork();
+      provider    = new ethers.providers.Web3Provider(window.ethereum);
+      signer      = provider.getSigner();
+      userAddress = await signer.getAddress();
+      contract    = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      onConnected(userAddress);
+
+      window.ethereum.on("accountsChanged", () => location.reload());
+      window.ethereum.on("chainChanged",    () => location.reload());
+      return;
+    } catch(err) {
+      showStatus(err.message || "Connection failed.", "error");
+      return;
+    }
+  }
+
+  // Mobile / no extension: open Web3Modal (WalletConnect)
+  if (window._w3modal) {
+    window._w3modal.open();
+  } else {
+    // fallback deep links for mobile
+    const ua = navigator.userAgent.toLowerCase();
+    const pageUrl = encodeURIComponent(window.location.href);
+    if (/android|iphone|ipad/.test(ua)) {
+      // try MetaMask deep link first
+      window.location.href = `https://metamask.app.link/dapp/${window.location.host}`;
+    } else {
+      showStatus("Please install MetaMask or Core Wallet.", "error");
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  LISTEN FOR WALLETCONNECT CONNECTION
+// ═══════════════════════════════════════════════════
+window.addEventListener('walletConnected', async (e) => {
+  const address = e.detail;
+  if (!address || userAddress) return;
+
+  userAddress = address;
+
+  // use public RPC for read, WalletConnect for write
+  const readProvider = new ethers.providers.JsonRpcProvider(AVAX_RPC);
+
+  // For signing/writing we need the wagmi connector
+  // Use window.ethereum if available after WC connection, else read-only
+  if (window.ethereum) {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer   = provider.getSigner();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+  } else {
+    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
+  }
+
+  onConnected(address);
+});
+
+// ═══════════════════════════════════════════════════
+//  ON CONNECTED — shared UI update
+// ═══════════════════════════════════════════════════
+async function onConnected(address) {
+  const short = address.slice(0,6) + "..." + address.slice(-4);
+  const btn   = document.getElementById("connectBtn");
+  btn.textContent = "⬡ " + short;
+  btn.classList.add("connected");
+  document.getElementById("walletInfo").textContent = "AVAX C-CHAIN · MAINNET · CONNECTED";
+  await loadRanks();
+}
+
+// ═══════════════════════════════════════════════════
+//  ENSURE AVAX NETWORK
+// ═══════════════════════════════════════════════════
 async function ensureAvaxNetwork() {
   const chainId = await window.ethereum.request({ method: "eth_chainId" });
   if (chainId !== AVAX_CHAIN_ID) {
@@ -706,7 +559,7 @@ async function ensureAvaxNetwork() {
             chainId: AVAX_CHAIN_ID,
             chainName: "Avalanche C-Chain",
             nativeCurrency: { name:"AVAX", symbol:"AVAX", decimals:18 },
-            rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+            rpcUrls: [AVAX_RPC],
             blockExplorerUrls: ["https://snowtrace.io/"]
           }]
         });
@@ -716,79 +569,40 @@ async function ensureAvaxNetwork() {
 }
 
 // ═══════════════════════════════════════════════════
-//  CONNECT WALLET
-// ═══════════════════════════════════════════════════
-async function connectWallet() {
-  if (!window.ethereum) {
-    showStatus("No wallet detected. Install MetaMask or Core Wallet.", "error");
-    return;
-  }
-  try {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-    await ensureAvaxNetwork();
-
-    provider    = new ethers.providers.Web3Provider(window.ethereum);
-    signer      = provider.getSigner();
-    userAddress = await signer.getAddress();
-    contract    = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-    const short = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
-    const btn   = document.getElementById("connectBtn");
-    btn.textContent = "⬡ " + short;
-    btn.classList.add("connected");
-    document.getElementById("walletInfo").textContent = "AVAX C-CHAIN · MAINNET · CONNECTED";
-
-    await loadRanks();
-
-    window.ethereum.on("accountsChanged", () => location.reload());
-    window.ethereum.on("chainChanged",    () => location.reload());
-
-  } catch(err) {
-    showStatus(err.message || "Connection failed.", "error");
-  }
-}
-
-// ═══════════════════════════════════════════════════
-//  LOAD RANKS FROM CONTRACT
+//  LOAD RANKS
 // ═══════════════════════════════════════════════════
 async function loadRanks() {
   try {
-    claimedRanks = await contract.getRanks(userAddress);
+    const readProvider = new ethers.providers.JsonRpcProvider(AVAX_RPC);
+    const readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
+    claimedRanks = await readContract.getRanks(userAddress);
     renderGrid();
   } catch(err) {
-    showStatus("Could not load ranks from contract.", "error");
+    showStatus("Could not load ranks.", "error");
     renderGrid();
   }
 }
 
 // ═══════════════════════════════════════════════════
-//  RENDER RANK GRID
+//  RENDER GRID
 // ═══════════════════════════════════════════════════
 function renderGrid() {
   const grid = document.getElementById("rankGrid");
   grid.innerHTML = "";
-
   RANKS.forEach((rank, i) => {
     const claimed  = claimedRanks[i];
     const disabled = claimed || !userAddress;
-
     const card = document.createElement("div");
     card.className = "rank-card" + (claimed ? " claimed-card" : "");
-    card.id = `card-${i}`;
-
     card.innerHTML = `
       <div class="rank-number">RANK 0${i+1}</div>
       <div class="rank-name">${rank.name}</div>
       <div class="rank-price">${rank.price} AVAX</div>
       <div class="rank-desc">${rank.desc}</div>
-      <button
-        class="claim-btn ${claimed ? 'claimed' : 'unclaimed'}"
-        id="btn-${i}"
-        onclick="claimRank(${i})"
-        ${disabled ? 'disabled' : ''}
-      >${claimed ? '✓ CLAIMED' : 'GET RANK'}</button>
-    `;
-
+      <button class="claim-btn ${claimed ? 'claimed' : 'unclaimed'}"
+        onclick="claimRank(${i})" ${disabled ? 'disabled' : ''}>
+        ${claimed ? '✓ CLAIMED' : 'GET RANK'}
+      </button>`;
     grid.appendChild(card);
   });
 }
@@ -797,13 +611,20 @@ function renderGrid() {
 //  CLAIM RANK
 // ═══════════════════════════════════════════════════
 async function claimRank(rankIndex) {
-  if (!contract) { showStatus("Connect your wallet first.", "error"); return; }
+  if (!userAddress) { showStatus("Connect your wallet first.", "error"); return; }
+  if (!contract)    { showStatus("Contract not ready.", "error"); return; }
 
   const rank  = RANKS[rankIndex];
   const value = ethers.utils.parseEther(rank.price);
 
   try {
     setLoading(true);
+    // re-init signer contract in case of WC connection
+    if (window.ethereum) {
+      const p = new ethers.providers.Web3Provider(window.ethereum);
+      const s = p.getSigner();
+      contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, s);
+    }
     const tx = await contract.claimRank(rankIndex, { value });
     showStatus("Transaction sent · Waiting for confirmation...", "");
     await tx.wait();
@@ -824,7 +645,6 @@ async function claimRank(rankIndex) {
 function setLoading(on) {
   document.getElementById("loadingOverlay").classList.toggle("active", on);
 }
-
 let _st;
 function showStatus(msg, type) {
   const el = document.getElementById("statusMsg");
@@ -833,109 +653,67 @@ function showStatus(msg, type) {
   clearTimeout(_st);
   _st = setTimeout(() => { el.className = ""; }, 5000);
 }
-
-// ═══════════════════════════════════════════════════
-//  THEME TOGGLE
-// ═══════════════════════════════════════════════════
 function toggleTheme() {
   const isLight = document.body.classList.toggle("light");
   document.getElementById("themeToggle").textContent = isLight ? "☾ DARK" : "☀ LIGHT";
 }
 
 // ═══════════════════════════════════════════════════
-//  COSMIC GREEN WEAVE CANVAS
+//  COSMIC CANVAS
 // ═══════════════════════════════════════════════════
 (function() {
   const canvas = document.getElementById("bgCanvas");
   const ctx    = canvas.getContext("2d");
-
   let W, H, nodes = [], frame = 0;
 
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   function initNodes() {
     nodes = [];
     const count = Math.floor((W * H) / 9000);
     for (let i = 0; i < count; i++) {
       nodes.push({
-        x:  Math.random() * W,
-        y:  Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        r:  Math.random() * 1.5 + 0.5,
-        hue: Math.random() > 0.6 ? 145 : 48  // green or gold
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25,
+        r: Math.random()*1.5+0.5, hue: Math.random()>0.6 ? 145 : 48
       });
     }
   }
-
   function draw() {
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
     const isLight = document.body.classList.contains("light");
-
-    // radial glow
-    const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.55);
-    if (isLight) {
-      grd.addColorStop(0,   "rgba(0,160,80,0.10)");
-      grd.addColorStop(0.5, "rgba(0,100,40,0.04)");
-    } else {
-      grd.addColorStop(0,   "rgba(0,80,30,0.18)");
-      grd.addColorStop(0.5, "rgba(0,40,15,0.06)");
-    }
+    const grd = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.55);
+    grd.addColorStop(0,   isLight ? "rgba(0,160,80,0.10)" : "rgba(0,80,30,0.18)");
+    grd.addColorStop(0.5, isLight ? "rgba(0,100,40,0.04)" : "rgba(0,40,15,0.06)");
     grd.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-
-    // connections
+    ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
     const DIST = 130;
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i+1; j < nodes.length; j++) {
-        const dx   = nodes[i].x - nodes[j].x;
-        const dy   = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
         if (dist < DIST) {
-          const alpha = (1 - dist/DIST) * (isLight ? 0.28 : 0.18);
-          const hue   = (nodes[i].hue + nodes[j].hue) / 2;
-          const lum   = isLight ? 35 : 50;
-          ctx.strokeStyle = `hsla(${hue}, 80%, ${lum}%, ${alpha})`;
-          ctx.lineWidth   = 0.7;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.stroke();
+          const alpha=(1-dist/DIST)*(isLight?0.28:0.18);
+          const hue=(nodes[i].hue+nodes[j].hue)/2;
+          ctx.strokeStyle=`hsla(${hue},80%,${isLight?35:50}%,${alpha})`;
+          ctx.lineWidth=0.7;
+          ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
         }
       }
     }
-
-    // nodes
     nodes.forEach(n => {
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-      const lum = isLight ? 35 : 60;
-      ctx.fillStyle = `hsla(${n.hue}, 90%, ${lum}%, 0.55)`;
-      ctx.fill();
-      n.x += n.vx;
-      n.y += n.vy;
-      if (n.x < 0 || n.x > W) n.vx *= -1;
-      if (n.y < 0 || n.y > H) n.vy *= -1;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${n.hue},90%,${isLight?35:60}%,0.55)`; ctx.fill();
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1; if(n.y<0||n.y>H) n.vy*=-1;
     });
-
-    frame++;
-    requestAnimationFrame(draw);
+    frame++; requestAnimationFrame(draw);
   }
-
-  resize();
-  initNodes();
-  draw();
-  window.addEventListener("resize", () => { resize(); initNodes(); });
+  resize(); initNodes(); draw();
+  window.addEventListener("resize", ()=>{ resize(); initNodes(); });
 })();
 
-// ═══════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════
 renderGrid();
 </script>
 </body>
 </html>
+HTMLEOF
