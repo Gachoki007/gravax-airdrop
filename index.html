@@ -268,6 +268,21 @@
       border-radius: 8px;
       flex-shrink: 0;
     }
+    .core-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #000;
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
     .wallet-option-sub {
       font-size: 10px;
       letter-spacing: 1px;
@@ -482,7 +497,7 @@
 
     <!-- Core Wallet -->
     <button class="wallet-option" onclick="connectWith('core')">
-      <img src="https://images.ctfassets.net/gcj8jwzm6086/7FjHCgFMzJsqFiJVHZEX4J/b92db1ebe43e57a21a02b6b8afe35906/core-512.png" alt="Core"/>
+      <div class="core-logo">CORE</div>
       <div>
         Core Wallet
         <span class="wallet-option-sub">Native AVAX wallet · Recommended</span>
@@ -497,15 +512,6 @@
       <div>
         MetaMask Mobile
         <span class="wallet-option-sub">Opens MetaMask app on your phone</span>
-      </div>
-    </button>
-
-    <!-- Core Mobile Deep Link -->
-    <button class="wallet-option" onclick="openInCoreApp()">
-      <img src="https://images.ctfassets.net/gcj8jwzm6086/7FjHCgFMzJsqFiJVHZEX4J/b92db1ebe43e57a21a02b6b8afe35906/core-512.png" alt="Core Mobile"/>
-      <div>
-        Core Mobile
-        <span class="wallet-option-sub">Opens Core app on your phone</span>
       </div>
     </button>
 
