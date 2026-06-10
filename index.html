@@ -170,20 +170,29 @@
     /* ══ CONNECT BTN ══ */
     #connectBtn {
       margin-top:28px; padding:15px 52px;
-      background:transparent; border:1px solid var(--green);
-      color:var(--green); font-family:var(--cinzel);
-      font-size:13px; font-weight:600; letter-spacing:5px;
+      background: linear-gradient(135deg, #005c2e, #007a3d, #00a855);
+      border: 1px solid #00c45e;
+      color: #ffffff;
+      font-family:var(--cinzel);
+      font-size:13px; font-weight:700; letter-spacing:5px;
       text-transform:uppercase; cursor:pointer; transition:all 0.3s;
       position:relative; overflow:hidden;
+      box-shadow: 0 0 24px rgba(0,196,94,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
     }
     #connectBtn::before {
       content:''; position:absolute; inset:0;
-      background:linear-gradient(135deg,rgba(0,255,127,0.1),rgba(0,196,94,0.05));
+      background: linear-gradient(135deg, #007a3d, #00c45e, #00ff7f);
       transform:scaleX(0); transform-origin:left; transition:transform 0.3s; z-index:-1;
     }
     #connectBtn:hover::before { transform:scaleX(1); }
-    #connectBtn:hover { letter-spacing:7px; }
-    #connectBtn.connected { border-color:rgba(212,160,23,0.5); color:var(--gold); font-size:11px; letter-spacing:2px; cursor:default; }
+    #connectBtn:hover { letter-spacing:7px; box-shadow: 0 0 40px rgba(0,255,127,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
+    #connectBtn.connected {
+      background: linear-gradient(135deg, rgba(180,130,0,0.3), rgba(212,160,23,0.2));
+      border-color: rgba(212,160,23,0.6);
+      color: #ffe066;
+      font-size:11px; letter-spacing:2px; cursor:default;
+      box-shadow: 0 0 16px rgba(212,160,23,0.15);
+    }
     #connectBtn.connected:hover { letter-spacing:2px; }
     #connectBtn.connected::before { display:none; }
 
@@ -397,33 +406,32 @@
       opacity:0.35; cursor:not-allowed;
     }
 
-    /* CLAIMED — luminous green for ranks 0-4 */
+    /* CLAIMED — solid dark green, white text, ranks 0-4 */
     .claim-btn.claimed {
-      background:rgba(0,255,127,0.1);
-      border-color:rgba(0,255,127,0.5);
-      color:#00ff7f;
-      cursor:default;
-      text-shadow:0 0 12px rgba(0,255,127,0.6);
-      box-shadow:0 0 16px rgba(0,255,127,0.1), inset 0 0 12px rgba(0,255,127,0.05);
-      animation:claimedGlow 2.5s ease-in-out infinite alternate;
+      background: linear-gradient(135deg, #005c2e, #007a3d, #00a855);
+      border-color: #00c45e;
+      color: #ffffff;
+      cursor: default;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(0,196,94,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+      animation: claimedGlow 2.5s ease-in-out infinite alternate;
     }
     @keyframes claimedGlow {
-      from { box-shadow:0 0 10px rgba(0,255,127,0.1),inset 0 0 8px rgba(0,255,127,0.04); }
-      to   { box-shadow:0 0 24px rgba(0,255,127,0.18),inset 0 0 16px rgba(0,255,127,0.08); }
+      from { box-shadow: 0 0 12px rgba(0,196,94,0.25), inset 0 1px 0 rgba(255,255,255,0.12); }
+      to   { box-shadow: 0 0 28px rgba(0,255,127,0.4),  inset 0 1px 0 rgba(255,255,255,0.18); }
     }
 
     /* CLAIMED — golden for rank 5 (Legendary Sentinel) */
-    .rank-5 .claim-btn.claimed {
-      background:rgba(255,224,102,0.1);
-      border-color:rgba(255,224,102,0.55);
-      color:#ffe066;
-      text-shadow:0 0 14px rgba(255,224,102,0.7);
-      box-shadow:0 0 18px rgba(255,224,102,0.12),inset 0 0 12px rgba(255,224,102,0.06);
-      animation:claimedGold 2.5s ease-in-out infinite alternate;
+    .rank-panel.rank-5 .claim-btn.claimed {
+      background: linear-gradient(135deg, #7a5000, #b8860b, #d4a017);
+      border-color: #ffe066;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(212,160,23,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
+      animation: claimedGold 2.5s ease-in-out infinite alternate;
     }
     @keyframes claimedGold {
-      from { box-shadow:0 0 12px rgba(255,224,102,0.12),inset 0 0 8px rgba(255,224,102,0.05); }
-      to   { box-shadow:0 0 28px rgba(255,224,102,0.22),inset 0 0 18px rgba(255,224,102,0.1); }
+      from { box-shadow: 0 0 14px rgba(212,160,23,0.3),  inset 0 1px 0 rgba(255,255,255,0.12); }
+      to   { box-shadow: 0 0 32px rgba(255,224,102,0.45), inset 0 1px 0 rgba(255,255,255,0.2); }
     }
 
     /* ══ FOOTER ══ */
@@ -591,7 +599,15 @@ let provider, signer, contract, userAddress;
 let claimedRanks = [false,false,false,false,false,false];
 
 // ══ WALLET MODAL ════════════════════════════
-function openWalletModal() { if (userAddress) return; document.getElementById("walletModal").classList.add("active"); }
+function isInAppBrowser() {
+  const ua = navigator.userAgent || "";
+  return ua.includes("MetaMaskMobile") || ua.includes("DappBrowser") || (window.ethereum && window.ethereum.isMetaMask && /iPhone|Android/.test(ua));
+}
+function openWalletModal() {
+  if (userAddress) return;
+  if (isInAppBrowser() && window.ethereum) { connectWallet(); return; }
+  document.getElementById("walletModal").classList.add("active");
+}
 function closeWalletModal() { document.getElementById("walletModal").classList.remove("active"); }
 document.getElementById("walletModal").addEventListener("click", function(e){ if(e.target===this)closeWalletModal(); });
 function openInMetaMaskApp() { window.location.href = "https://metamask.app.link/dapp/greenavax.xyz"; }
