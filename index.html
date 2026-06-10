@@ -703,23 +703,28 @@ async function claimRank(rankIndex) {
     showStatus("Transaction sent · Waiting for confirmation...", "");
     await tx.wait();
     showStatus(`${rank.name} claimed! Welcome, Guardian.`, "success");
-    // ── update button instantly without waiting for full re-render ──
     claimedRanks[rankIndex] = true;
-    const btn = document.getElementById(`btn-${rankIndex}`);
+
+    // ── flip this button instantly — NO full re-render ──
+    const btn  = document.getElementById(`btn-${rankIndex}`);
+    const card = btn ? btn.closest(".rank-panel") : null;
     if (btn) {
       btn.textContent = "✦ CLAIMED";
-      btn.className   = "claim-btn claimed";
-      btn.disabled    = true;
-      // gold class for legendary sentinel
-      const card = btn.closest(".rank-panel");
-      if (card && card.classList.contains("rank-5")) {
-        btn.style.background = "linear-gradient(135deg,#7a5000,#b8860b,#d4a017)";
-        btn.style.borderColor = "#ffe066";
+      btn.classList.remove("unclaimed");
+      btn.classList.add("claimed");
+      btn.disabled = true;
+      btn.onclick  = null;
+      if (rankIndex === 5) {
+        btn.style.background   = "linear-gradient(135deg,#7a5000,#b8860b,#d4a017)";
+        btn.style.borderColor  = "#ffe066";
+        btn.style.animation    = "claimedGold 2.5s ease-in-out infinite alternate";
       }
-      // mark card as claimed
-      if (card) card.style.borderColor = rankIndex === 5 ? "rgba(255,224,102,0.45)" : "rgba(0,196,94,0.45)";
     }
-    renderGrid();
+    if (card) {
+      card.style.borderColor = rankIndex === 5
+        ? "rgba(255,224,102,0.45)"
+        : "rgba(0,196,94,0.45)";
+    }
   } catch(err) {
     // stringify everything to catch nested error objects
     const raw = JSON.stringify(err).toLowerCase() + (err?.message||"").toLowerCase() + (err?.reason||"").toLowerCase();
