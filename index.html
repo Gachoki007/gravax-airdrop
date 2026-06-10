@@ -703,7 +703,22 @@ async function claimRank(rankIndex) {
     showStatus("Transaction sent · Waiting for confirmation...", "");
     await tx.wait();
     showStatus(`${rank.name} claimed! Welcome, Guardian.`, "success");
+    // ── update button instantly without waiting for full re-render ──
     claimedRanks[rankIndex] = true;
+    const btn = document.getElementById(`btn-${rankIndex}`);
+    if (btn) {
+      btn.textContent = "✦ CLAIMED";
+      btn.className   = "claim-btn claimed";
+      btn.disabled    = true;
+      // gold class for legendary sentinel
+      const card = btn.closest(".rank-panel");
+      if (card && card.classList.contains("rank-5")) {
+        btn.style.background = "linear-gradient(135deg,#7a5000,#b8860b,#d4a017)";
+        btn.style.borderColor = "#ffe066";
+      }
+      // mark card as claimed
+      if (card) card.style.borderColor = rankIndex === 5 ? "rgba(255,224,102,0.45)" : "rgba(0,196,94,0.45)";
+    }
     renderGrid();
   } catch(err) {
     const msg = err?.reason || err?.message || "Transaction failed.";
