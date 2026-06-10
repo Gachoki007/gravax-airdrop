@@ -721,8 +721,12 @@ async function claimRank(rankIndex) {
     }
     renderGrid();
   } catch(err) {
-    const msg = err?.reason || err?.message || "Transaction failed.";
-    showStatus(msg.length>90 ? msg.slice(0,90)+"…" : msg, "error");
+    const raw = (err?.reason || err?.message || err?.data?.message || JSON.stringify(err) || "").toLowerCase();
+    const isInsufficent = raw.includes("insufficient") || raw.includes("underpriced") || raw.includes("exceeds") || raw.includes("balance") || raw.includes("funds") || raw.includes("-32000") || raw.includes("intrinsic gas");
+    const msg = isInsufficent
+      ? "INSUFFICIENT AVAX TO CLAIM RANK"
+      : "Transaction failed. Please try again.";
+    showStatus(msg, "error");
   } finally { setLoading(false); }
 }
 
