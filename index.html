@@ -721,11 +721,13 @@ async function claimRank(rankIndex) {
     }
     renderGrid();
   } catch(err) {
-    const raw = (err?.reason || err?.message || err?.data?.message || JSON.stringify(err) || "").toLowerCase();
-    const isInsufficent = raw.includes("insufficient") || raw.includes("underpriced") || raw.includes("exceeds") || raw.includes("balance") || raw.includes("funds") || raw.includes("-32000") || raw.includes("intrinsic gas");
-    const msg = isInsufficent
-      ? "INSUFFICIENT AVAX TO CLAIM RANK"
-      : "Transaction failed. Please try again.";
+    // stringify everything to catch nested error objects
+    const raw = JSON.stringify(err).toLowerCase() + (err?.message||"").toLowerCase() + (err?.reason||"").toLowerCase();
+    const insufficient = raw.includes("insufficient") || raw.includes("balance") || raw.includes("funds") || raw.includes("exceeds") || raw.includes("-32000") || raw.includes("intrinsic") || raw.includes("underpriced") || raw.includes("out of gas");
+    const rejected     = raw.includes("user rejected") || raw.includes("user denied") || raw.includes("4001");
+    const msg = insufficient ? "INSUFFICIENT AVAX TO CLAIM RANK"
+              : rejected     ? "Transaction cancelled."
+              : "Transaction failed. Please try again.";
     showStatus(msg, "error");
   } finally { setLoading(false); }
 }
