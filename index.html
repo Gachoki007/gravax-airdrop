@@ -4,744 +4,520 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GREENAVAX — Proof of Conservation</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Raleway:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <!-- Cascadia Code font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cascadia+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Cascadia Code CDN fallback via bunny fonts -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&display=swap');
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
   <style>
-    :root {
-      --bg:         #040d06;
-      --bg2:        #071209;
-      --green:      #00ff7f;
-      --green-dim:  #00c45e;
-      --green-soft: rgba(0,255,127,0.08);
-      --gold:       #d4a017;
-      --gold-bright:#ffe066;
-      --red:        #ff3b3b;
-      --text:       #e8f5ec;
-      --muted:      #4a7a58;
-      --font-head:  'Cinzel', serif;
-      --font-body:  'Raleway', sans-serif;
-      --font-mono:  'Share Tech Mono', monospace;
+    /* ── Cascadia Code via local or fallback ── */
+    @font-face {
+      font-family: 'CascadiaCode';
+      src: url('https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@4.2.1/files/cascadia-code-all-400-normal.woff2') format('woff2');
+      font-weight: 400; font-style: normal;
+    }
+    @font-face {
+      font-family: 'CascadiaCode';
+      src: url('https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@4.2.1/files/cascadia-code-all-600-normal.woff2') format('woff2');
+      font-weight: 600; font-style: normal;
+    }
+    @font-face {
+      font-family: 'CascadiaCode';
+      src: url('https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@4.2.1/files/cascadia-code-all-700-normal.woff2') format('woff2');
+      font-weight: 700; font-style: normal;
     }
 
-    /* ── RANK PALETTE ── */
-    --r0-col:#7ec87e; --r0-glow:rgba(126,200,126,0.3);
-    --r1-col:#4db88c; --r1-glow:rgba(77,184,140,0.3);
-    --r2-col:#2ea87a; --r2-glow:rgba(46,168,122,0.3);
-    --r3-col:#1a9e6e; --r3-glow:rgba(26,158,110,0.3);
-    --r4-col:#00c45e; --r4-glow:rgba(0,196,94,0.35);
-    --r5-col:#ffe066; --r5-glow:rgba(255,224,102,0.4);
+    :root {
+      --bg:          #040d06;
+      --bg2:         #071209;
+      --green:       #00ff7f;
+      --green-dim:   #00c45e;
+      --gold:        #d4a017;
+      --gold-bright: #ffe066;
+      --red:         #ff3b3b;
+      --text:        #e8f5ec;
+      --muted:       #4a7a58;
+      --cc:          'CascadiaCode', 'Source Code Pro', 'Courier New', monospace;
+      --cinzel:      'Cinzel', serif;
+    }
 
-    *{box-sizing:border-box;margin:0;padding:0;}
-    html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+    /* ── LIGHT THEME ── */
+    body.light {
+      --bg:    #edf7f0;
+      --bg2:   #d8f0e0;
+      --text:  #0d2e18;
+      --muted: #3a6e4a;
+      --green: #007a3d;
+      --green-dim: #005c2e;
+      --gold:  #a07010;
+      --gold-bright: #c89020;
+    }
+    body.light #forestCanvas { opacity: 0.3; }
+    body.light .rank-panel { backdrop-filter: blur(20px); }
+    body.light .rank-panel.rank-0 { background: linear-gradient(135deg,rgba(200,240,210,0.88),rgba(220,255,225,0.78)); border-color: rgba(80,180,100,0.38); }
+    body.light .rank-panel.rank-1 { background: linear-gradient(135deg,rgba(190,235,215,0.88),rgba(210,250,230,0.78)); border-color: rgba(60,170,120,0.38); }
+    body.light .rank-panel.rank-2 { background: linear-gradient(135deg,rgba(175,230,205,0.9),rgba(200,245,220,0.8));   border-color: rgba(40,160,110,0.4); }
+    body.light .rank-panel.rank-3 { background: linear-gradient(135deg,rgba(160,225,195,0.92),rgba(185,240,210,0.82)); border-color: rgba(0,150,90,0.42); }
+    body.light .rank-panel.rank-4 { background: linear-gradient(135deg,rgba(140,220,180,0.93),rgba(170,235,200,0.83)); border-color: rgba(0,140,80,0.45); }
+    body.light .rank-panel.rank-5 { background: linear-gradient(135deg,rgba(255,248,210,0.93),rgba(255,240,180,0.83)); border-color: rgba(200,150,0,0.42); }
+    body.light .rank-panel .rank-desc { color: rgba(10,40,20,0.58); }
+    body.light .rank-panel .rank-name { -webkit-text-fill-color: unset; }
+    body.light .wallet-modal { background: linear-gradient(160deg,#e8f7ed,#d5f0e0); border-color: rgba(0,150,80,0.25); }
+    body.light .wallet-option { border-color: rgba(0,150,80,0.15); color: var(--text); }
+    body.light #themeToggle { background: rgba(220,245,228,0.9); border-color: rgba(0,150,80,0.3); color: var(--muted); }
+    body.light .social-btn.twitter { border-color: rgba(0,0,0,0.2); color: #1a1a1a; background: rgba(0,0,0,0.04); }
+    body.light .social-btn.twitter:hover { border-color: #000; color: #000; background: rgba(0,0,0,0.08); }
+    body.light #statusMsg { background: rgba(220,245,228,0.97); color: var(--text); }
+    body.light #loadingOverlay { background: rgba(230,248,235,0.93); }
+    body.light .poc-eyebrow { color: var(--muted); }
+    body.light .footer-label { color: var(--muted); }
+    body.light .copyright { color: rgba(10,40,20,0.3); }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ width:100%; min-height:100vh; overflow-x:hidden; }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: var(--font-body);
+      font-family: var(--cc);
+      transition: background 0.4s, color 0.4s;
     }
 
-    /* ══════════════════════════════
-       FOREST CANVAS BG
-    ══════════════════════════════ */
+    /* ══ CANVAS ══ */
     #forestCanvas {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; opacity: 0.65;
+      transition: opacity 0.4s;
     }
 
-    /* ══════════════════════════════
-       THEME TOGGLE
-    ══════════════════════════════ */
+    /* ══ THEME TOGGLE ══ */
     #themeToggle {
-      position: fixed;
-      top: 16px; right: 16px;
-      z-index: 300;
-      background: rgba(4,13,6,0.7);
-      border: 1px solid rgba(0,255,127,0.2);
+      position: fixed; top: 16px; right: 16px; z-index: 300;
+      background: rgba(4,13,6,0.75);
+      border: 1px solid rgba(0,255,127,0.22);
       color: var(--green-dim);
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      padding: 7px 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      backdrop-filter: blur(10px);
+      font-family: var(--cc); font-size: 10px; letter-spacing: 2px;
+      padding: 7px 14px; cursor: pointer;
+      transition: all 0.2s; backdrop-filter: blur(10px);
     }
     #themeToggle:hover { border-color: var(--green); color: var(--green); }
 
-    /* ══════════════════════════════
-       CONTENT
-    ══════════════════════════════ */
+    /* ══ CONTENT ══ */
     .content {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 24px 80px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      position: relative; z-index: 1;
+      width: 100%; max-width: 980px;
+      margin: 0 auto; padding: 0 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
     }
 
-    /* ══════════════════════════════
-       HEADER AREA
-    ══════════════════════════════ */
-    .header-area {
-      width: 100%;
-      text-align: center;
-      padding-top: 52px;
-      padding-bottom: 8px;
-    }
+    /* ══ HEADER ══ */
+    .header-area { width:100%; text-align:center; padding-top:52px; padding-bottom:8px; }
 
     .poc-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 6px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 16px;
+      font-family: var(--cc); font-size:11px; letter-spacing:6px;
+      color: var(--muted); text-transform:uppercase; margin-bottom:16px;
     }
 
     .hero-title {
-      font-family: var(--font-head);
-      font-size: clamp(42px, 8vw, 84px);
-      font-weight: 900;
-      letter-spacing: 3px;
-      line-height: 1;
-      background: linear-gradient(135deg, #ffe066 0%, #f5c842 18%, #00ff7f 42%, #d4a017 65%, #ffe066 82%, #00c45e 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      background-size: 300% 300%;
+      font-family: var(--cinzel);
+      font-size: clamp(42px,8vw,84px); font-weight:900;
+      letter-spacing:3px; line-height:1;
+      background: linear-gradient(135deg,#ffe066 0%,#f5c842 18%,#00ff7f 42%,#d4a017 65%,#ffe066 82%,#00c45e 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text; background-size:300% 300%;
       animation: shimmer 6s ease infinite;
       filter: drop-shadow(0 0 32px rgba(212,160,23,0.35)) drop-shadow(0 0 64px rgba(0,255,127,0.15));
     }
-    @keyframes shimmer {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    @keyframes shimmer { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
-    /* ══════════════════════════════
-       WALLET MODAL
-    ══════════════════════════════ */
+    /* ══ WALLET MODAL ══ */
     .wallet-modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      z-index: 500;
-      align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
+      display:none; position:fixed; inset:0; z-index:500;
+      align-items:center; justify-content:center;
+      background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);
     }
-    .wallet-modal-overlay.active { display: flex; }
-
+    .wallet-modal-overlay.active { display:flex; }
     .wallet-modal {
-      background: linear-gradient(160deg, #071209, #040d06);
-      border: 1px solid rgba(0,255,127,0.2);
-      padding: 36px 28px;
-      width: 100%; max-width: 380px;
-      display: flex; flex-direction: column; gap: 12px;
-      position: relative; border-radius: 6px;
-      box-shadow: 0 0 60px rgba(0,255,127,0.08);
+      background: linear-gradient(160deg,#071209,#040d06);
+      border:1px solid rgba(0,255,127,0.2); padding:36px 28px;
+      width:100%; max-width:380px;
+      display:flex; flex-direction:column; gap:12px;
+      position:relative; border-radius:6px;
+      box-shadow:0 0 60px rgba(0,255,127,0.08);
     }
-    .wallet-modal-title {
-      font-family: var(--font-head);
-      font-size: 15px; letter-spacing: 4px;
-      color: var(--green); text-align: center;
-      margin-bottom: 8px;
-    }
-    .wallet-modal-close {
-      position: absolute; top: 14px; right: 18px;
-      background: none; border: none;
-      color: var(--muted); font-size: 18px;
-      cursor: pointer; transition: color 0.2s;
-    }
-    .wallet-modal-close:hover { color: var(--green); }
-
+    .wallet-modal-title { font-family:var(--cinzel); font-size:14px; letter-spacing:4px; color:var(--green); text-align:center; margin-bottom:8px; }
+    .wallet-modal-close { position:absolute; top:14px; right:18px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; transition:color 0.2s; }
+    .wallet-modal-close:hover { color:var(--green); }
     .wallet-option {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 18px;
-      border: 1px solid rgba(0,255,127,0.1);
-      background: rgba(0,255,127,0.02);
-      color: var(--text);
-      font-family: var(--font-body); font-size: 14px; font-weight: 600;
-      letter-spacing: 1px; cursor: pointer;
-      transition: all 0.2s; text-align: left; width: 100%;
-      border-radius: 4px;
+      display:flex; align-items:center; gap:14px; padding:14px 18px;
+      border:1px solid rgba(0,255,127,0.1); background:rgba(0,255,127,0.02);
+      color:var(--text); font-family:var(--cc); font-size:13px; font-weight:500;
+      letter-spacing:1px; cursor:pointer; transition:all 0.2s;
+      text-align:left; width:100%; border-radius:4px;
     }
-    .wallet-option:hover { border-color: var(--green); color: var(--green); background: rgba(0,255,127,0.05); }
-    .wallet-option img { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; }
+    .wallet-option:hover { border-color:var(--green); color:var(--green); background:rgba(0,255,127,0.05); }
+    .wallet-option img { width:34px; height:34px; border-radius:8px; flex-shrink:0; }
     .core-logo {
-      width: 34px; height: 34px; border-radius: 8px;
-      background: #000; color: #fff;
-      font-family: var(--font-head); font-size: 10px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width:34px; height:34px; border-radius:8px; background:#000; color:#fff;
+      font-family:var(--cinzel); font-size:10px; font-weight:700;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
-    .wallet-option-sub { font-size: 10px; color: var(--muted); font-weight: 400; display: block; margin-top: 2px; letter-spacing: 0.5px; }
-    .wallet-divider { font-family: var(--font-mono); font-size: 10px; letter-spacing: 3px; color: var(--muted); text-align: center; }
+    .wallet-option-sub { font-size:10px; color:var(--muted); font-weight:400; display:block; margin-top:2px; }
+    .wallet-divider { font-family:var(--cc); font-size:10px; letter-spacing:3px; color:var(--muted); text-align:center; }
 
-    /* ══════════════════════════════
-       CONNECT BUTTON
-    ══════════════════════════════ */
+    /* ══ CONNECT BTN ══ */
     #connectBtn {
-      margin-top: 28px;
-      padding: 15px 52px;
-      background: transparent;
-      border: 1px solid var(--green);
-      color: var(--green);
-      font-family: var(--font-head);
-      font-size: 13px; font-weight: 600;
-      letter-spacing: 5px; text-transform: uppercase;
-      cursor: pointer; transition: all 0.3s;
-      position: relative; overflow: hidden;
+      margin-top:28px; padding:15px 52px;
+      background:transparent; border:1px solid var(--green);
+      color:var(--green); font-family:var(--cinzel);
+      font-size:13px; font-weight:600; letter-spacing:5px;
+      text-transform:uppercase; cursor:pointer; transition:all 0.3s;
+      position:relative; overflow:hidden;
     }
     #connectBtn::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(0,255,127,0.1), rgba(0,196,94,0.05));
-      transform: scaleX(0); transform-origin: left;
-      transition: transform 0.3s; z-index: -1;
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(0,255,127,0.1),rgba(0,196,94,0.05));
+      transform:scaleX(0); transform-origin:left; transition:transform 0.3s; z-index:-1;
     }
-    #connectBtn:hover::before { transform: scaleX(1); }
-    #connectBtn:hover { letter-spacing: 7px; }
-    #connectBtn.connected {
-      border-color: rgba(212,160,23,0.5);
-      color: var(--gold);
-      font-size: 11px; letter-spacing: 2px;
-      cursor: default;
+    #connectBtn:hover::before { transform:scaleX(1); }
+    #connectBtn:hover { letter-spacing:7px; }
+    #connectBtn.connected { border-color:rgba(212,160,23,0.5); color:var(--gold); font-size:11px; letter-spacing:2px; cursor:default; }
+    #connectBtn.connected:hover { letter-spacing:2px; }
+    #connectBtn.connected::before { display:none; }
+
+    #walletInfo { margin-top:10px; font-family:var(--cc); font-size:10px; letter-spacing:3px; color:var(--muted); min-height:14px; }
+
+    /* ══ SECTION HEADER ══ */
+    .section-wrap { width:100%; margin-top:52px; text-align:center; }
+    .section-title { font-family:var(--cinzel); font-size:clamp(15px,3vw,21px); font-weight:700; letter-spacing:5px; color:var(--green); text-transform:uppercase; }
+    .section-sub { margin-top:12px; font-family:var(--cc); font-size:12px; font-weight:400; letter-spacing:1px; color:#ffffff; opacity:0.92; line-height:1.6; }
+
+    /* ══════════════════════════════════════
+       RANK GRID — 2 cols × 3 rows
+    ══════════════════════════════════════ */
+    .rank-grid {
+      width:100%; margin-top:44px;
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:16px;
     }
-    #connectBtn.connected:hover { letter-spacing: 2px; }
-    #connectBtn.connected::before { display: none; }
+    @media(max-width:640px){ .rank-grid { grid-template-columns:1fr; gap:14px; } }
+    @media(max-width:400px){ .content { padding:0 12px 60px; } }
 
-    #walletInfo {
-      margin-top: 10px;
-      font-family: var(--font-mono);
-      font-size: 10px; letter-spacing: 3px;
-      color: var(--muted); min-height: 14px;
-    }
-
-    /* ══════════════════════════════
-       SECTION HEADER
-    ══════════════════════════════ */
-    .section-wrap {
-      width: 100%;
-      margin-top: 56px;
-      text-align: center;
-    }
-
-    .section-title {
-      font-family: var(--font-head);
-      font-size: clamp(16px, 3vw, 22px);
-      font-weight: 700;
-      letter-spacing: 5px;
-      color: var(--green);
-      text-transform: uppercase;
-    }
-
-    .section-sub {
-      margin-top: 12px;
-      font-family: var(--font-body);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 1.5px;
-      color: #ffffff;
-      opacity: 0.9;
-    }
-
-    /* ══════════════════════════════
-       RANK PROGRESSION JOURNEY
-    ══════════════════════════════ */
-    .rank-journey {
-      width: 100%;
-      margin-top: 48px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      position: relative;
-    }
-
-    /* spine line */
-    .rank-journey::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 0; bottom: 0;
-      width: 1px;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(0,255,127,0.12) 8%,
-        rgba(0,255,127,0.2) 50%,
-        rgba(255,224,102,0.3) 90%,
-        transparent 100%
-      );
-      transform: translateX(-50%);
-      pointer-events: none;
-    }
-
-    @media (max-width: 680px) {
-      .rank-journey::before { left: 24px; }
-    }
-
-    /* ══════════════════════════════
-       RANK ROW
-    ══════════════════════════════ */
-    .rank-row {
-      display: flex;
-      align-items: stretch;
-      gap: 0;
-      position: relative;
-      margin-bottom: 0;
-    }
-
-    /* alternating layout */
-    .rank-row:nth-child(even) { flex-direction: row-reverse; }
-
-    @media (max-width: 680px) {
-      .rank-row, .rank-row:nth-child(even) { flex-direction: column; }
-    }
-
-    /* ══════════════════════════════
-       RANK NODE (spine dot)
-    ══════════════════════════════ */
-    .rank-node {
-      width: 60px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .rank-node-dot {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      border: 2px solid;
-      background: var(--bg);
-      position: relative;
-      z-index: 2;
-      transition: all 0.3s;
-    }
-
-    .rank-row:hover .rank-node-dot {
-      transform: scale(1.4);
-    }
-
-    @media (max-width: 680px) {
-      .rank-node { width: 48px; align-self: flex-start; padding-top: 24px; }
-    }
-
-    /* ══════════════════════════════
-       RANK PANEL — glassmorphism
-    ══════════════════════════════ */
+    /* ══════════════════════════════════════
+       RANK PANEL — glassmorphism + custom corners
+    ══════════════════════════════════════ */
     .rank-panel {
-      flex: 1;
-      margin: 12px 0;
-      padding: 28px 28px 24px;
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-      cursor: default;
+      position:relative; overflow:hidden;
+      padding:26px 24px 22px;
+      border-radius:4px;
+      backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
       transition: transform 0.35s cubic-bezier(0.34,1.3,0.64,1), box-shadow 0.35s;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      cursor:default;
+    }
+    .rank-panel:hover { transform:translateY(-5px) scale(1.015); }
+
+    /* shine sweep on hover */
+    .rank-panel .shine {
+      position:absolute; top:0; left:-100%;
+      width:55%; height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.045),transparent);
+      transform:skewX(-15deg); transition:left 0.55s; pointer-events:none;
+    }
+    .rank-panel:hover .shine { left:160%; }
+
+    /* top accent bar */
+    .rank-panel .top-bar {
+      position:absolute; top:0; left:0; right:0; height:2px; border-radius:4px 4px 0 0;
     }
 
-    .rank-panel:hover {
-      transform: translateY(-4px) scale(1.01);
+    /* ── CUSTOM CORNER ACCENTS (SVG clip) ── */
+    .rank-panel .corner-tl,
+    .rank-panel .corner-tr,
+    .rank-panel .corner-bl,
+    .rank-panel .corner-br {
+      position:absolute; width:18px; height:18px;
+      border-style:solid; border-color:inherit;
+      pointer-events:none;
     }
+    .rank-panel .corner-tl { top:0;    left:0;  border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
+    .rank-panel .corner-tr { top:0;    right:0; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+    .rank-panel .corner-bl { bottom:0; left:0;  border-width:0 0 2px 2px; border-radius:0 0 0 4px; }
+    .rank-panel .corner-br { bottom:0; right:0; border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
 
-    /* inner shine sweep */
-    .rank-panel::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
-      transform: skewX(-15deg);
-      transition: left 0.6s;
-      pointer-events: none;
-    }
-    .rank-panel:hover::before { left: 150%; }
-
-    /* top accent line */
+    /* inner notch — decorative cut corner feel */
     .rank-panel::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      border-radius: 8px 8px 0 0;
+      content:'';
+      position:absolute; bottom:0; right:0;
+      width:28px; height:28px;
+      background:inherit;
+      clip-path:polygon(100% 0,100% 100%,0 100%);
+      opacity:0.6;
     }
 
-    /* spacer half */
-    .rank-spacer {
-      flex: 1;
-    }
+    /* ── PER-RANK THEMES ── */
 
-    @media (max-width: 680px) {
-      .rank-spacer { display: none; }
-      .rank-panel { margin: 8px 0 8px 12px; }
+    /* rank 0 — Sprout */
+    .rank-0 {
+      background:linear-gradient(135deg,rgba(10,28,14,0.76),rgba(6,18,9,0.66));
+      border:1px solid rgba(126,200,126,0.22);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(126,200,126,0.08);
     }
+    .rank-0:hover { box-shadow:0 18px 52px rgba(0,0,0,0.5),0 0 32px rgba(126,200,126,0.13); }
+    .rank-0 .top-bar { background:linear-gradient(90deg,transparent,#7ec87e,transparent); }
+    .rank-0 .corner-tl,.rank-0 .corner-tr,.rank-0 .corner-bl,.rank-0 .corner-br { border-color:rgba(126,200,126,0.45); }
+    .rank-0 .rank-num  { color:rgba(126,200,126,0.5); }
+    .rank-0 .rank-name { color:#a8e8a8; }
+    .rank-0 .rank-price{ color:#7ec87e; }
+    .rank-0 .rank-icon { color:#7ec87e; text-shadow:0 0 20px rgba(126,200,126,0.5); }
 
-    /* ── rank 0 — SPROUT ── */
-    .rank-0 .rank-panel {
-      background: linear-gradient(135deg, rgba(10,28,14,0.75) 0%, rgba(6,18,9,0.65) 100%);
-      border: 1px solid rgba(126,200,126,0.2);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(126,200,126,0.08);
+    /* rank 1 — Conservationist */
+    .rank-1 {
+      background:linear-gradient(135deg,rgba(8,26,18,0.79),rgba(5,16,11,0.69));
+      border:1px solid rgba(77,184,140,0.24);
+      box-shadow:0 8px 36px rgba(0,0,0,0.45),inset 0 1px 0 rgba(77,184,140,0.1);
     }
-    .rank-0 .rank-panel:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 30px rgba(126,200,126,0.12), inset 0 1px 0 rgba(126,200,126,0.1); }
-    .rank-0 .rank-panel::after { background: linear-gradient(90deg, transparent, #7ec87e, transparent); }
-    .rank-0 .rank-node-dot { border-color: #7ec87e; box-shadow: 0 0 8px rgba(126,200,126,0.4); }
-    .rank-0 .rank-num { color: rgba(126,200,126,0.5); }
-    .rank-0 .rank-name { color: #a8e8a8; }
-    .rank-0 .rank-price { color: #7ec87e; }
-    .rank-0 .rank-icon { color: #7ec87e; text-shadow: 0 0 20px rgba(126,200,126,0.5); }
-    .rank-0 .claim-btn.unclaimed { background: rgba(126,200,126,0.12); border-color: rgba(126,200,126,0.4); color: #a8e8a8; }
-    .rank-0 .claim-btn.unclaimed:hover:not(:disabled) { background: #7ec87e; color: #040d06; }
+    .rank-1:hover { box-shadow:0 22px 60px rgba(0,0,0,0.5),0 0 38px rgba(77,184,140,0.15); }
+    .rank-1 .top-bar { background:linear-gradient(90deg,transparent,#4db88c,transparent); }
+    .rank-1 .corner-tl,.rank-1 .corner-tr,.rank-1 .corner-bl,.rank-1 .corner-br { border-color:rgba(77,184,140,0.5); }
+    .rank-1 .rank-num  { color:rgba(77,184,140,0.5); }
+    .rank-1 .rank-name { color:#88d8b8; }
+    .rank-1 .rank-price{ color:#4db88c; }
+    .rank-1 .rank-icon { color:#4db88c; text-shadow:0 0 24px rgba(77,184,140,0.6); }
 
-    /* ── rank 1 — CONSERVATIONIST ── */
-    .rank-1 .rank-panel {
-      background: linear-gradient(135deg, rgba(8,26,18,0.78) 0%, rgba(5,16,11,0.68) 100%);
-      border: 1px solid rgba(77,184,140,0.22);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(77,184,140,0.1);
+    /* rank 2 — Forest Guardian */
+    .rank-2 {
+      background:linear-gradient(135deg,rgba(6,24,16,0.83),rgba(4,14,9,0.73));
+      border:1px solid rgba(46,168,122,0.26);
+      box-shadow:0 10px 42px rgba(0,0,0,0.5),inset 0 1px 0 rgba(46,168,122,0.12);
     }
-    .rank-1 .rank-panel:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.5), 0 0 36px rgba(77,184,140,0.14), inset 0 1px 0 rgba(77,184,140,0.12); }
-    .rank-1 .rank-panel::after { background: linear-gradient(90deg, transparent, #4db88c, transparent); }
-    .rank-1 .rank-node-dot { border-color: #4db88c; box-shadow: 0 0 10px rgba(77,184,140,0.5); }
-    .rank-1 .rank-num { color: rgba(77,184,140,0.5); }
-    .rank-1 .rank-name { color: #88d8b8; }
-    .rank-1 .rank-price { color: #4db88c; }
-    .rank-1 .rank-icon { color: #4db88c; text-shadow: 0 0 24px rgba(77,184,140,0.6); }
-    .rank-1 .claim-btn.unclaimed { background: rgba(77,184,140,0.1); border-color: rgba(77,184,140,0.4); color: #88d8b8; }
-    .rank-1 .claim-btn.unclaimed:hover:not(:disabled) { background: #4db88c; color: #040d06; }
+    .rank-2:hover { box-shadow:0 26px 68px rgba(0,0,0,0.55),0 0 44px rgba(46,168,122,0.18); }
+    .rank-2 .top-bar { background:linear-gradient(90deg,transparent,#2ea87a,transparent); }
+    .rank-2 .corner-tl,.rank-2 .corner-tr,.rank-2 .corner-bl,.rank-2 .corner-br { border-color:rgba(46,168,122,0.55); }
+    .rank-2 .rank-num  { color:rgba(46,168,122,0.5); }
+    .rank-2 .rank-name { color:#70c8a0; }
+    .rank-2 .rank-price{ color:#2ea87a; }
+    .rank-2 .rank-icon { color:#2ea87a; text-shadow:0 0 28px rgba(46,168,122,0.7); }
 
-    /* ── rank 2 — FOREST GUARDIAN ── */
-    .rank-2 .rank-panel {
-      background: linear-gradient(135deg, rgba(6,24,16,0.82) 0%, rgba(4,14,9,0.72) 100%);
-      border: 1px solid rgba(46,168,122,0.25);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(46,168,122,0.12);
+    /* rank 3 — Carbon Warden */
+    .rank-3 {
+      background:linear-gradient(135deg,rgba(5,22,14,0.86),rgba(3,13,8,0.76));
+      border:1px solid rgba(0,196,94,0.29);
+      box-shadow:0 12px 50px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,196,94,0.14);
     }
-    .rank-2 .rank-panel:hover { box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 40px rgba(46,168,122,0.18), inset 0 1px 0 rgba(46,168,122,0.15); }
-    .rank-2 .rank-panel::after { background: linear-gradient(90deg, transparent, #2ea87a, transparent); }
-    .rank-2 .rank-node-dot { border-color: #2ea87a; box-shadow: 0 0 12px rgba(46,168,122,0.6); }
-    .rank-2 .rank-num { color: rgba(46,168,122,0.5); }
-    .rank-2 .rank-name { color: #70c8a0; }
-    .rank-2 .rank-price { color: #2ea87a; }
-    .rank-2 .rank-icon { color: #2ea87a; text-shadow: 0 0 28px rgba(46,168,122,0.7); }
-    .rank-2 .claim-btn.unclaimed { background: rgba(46,168,122,0.1); border-color: rgba(46,168,122,0.45); color: #70c8a0; }
-    .rank-2 .claim-btn.unclaimed:hover:not(:disabled) { background: #2ea87a; color: #040d06; }
+    .rank-3:hover { box-shadow:0 30px 76px rgba(0,0,0,0.6),0 0 50px rgba(0,196,94,0.2); }
+    .rank-3 .top-bar { background:linear-gradient(90deg,transparent,#00c45e,transparent); }
+    .rank-3 .corner-tl,.rank-3 .corner-tr,.rank-3 .corner-bl,.rank-3 .corner-br { border-color:rgba(0,196,94,0.6); }
+    .rank-3 .rank-num  { color:rgba(0,196,94,0.5); }
+    .rank-3 .rank-name { color:#55e090; }
+    .rank-3 .rank-price{ color:#00c45e; }
+    .rank-3 .rank-icon { color:#00c45e; text-shadow:0 0 32px rgba(0,196,94,0.8); }
 
-    /* ── rank 3 — CARBON WARDEN ── */
-    .rank-3 .rank-panel {
-      background: linear-gradient(135deg, rgba(5,22,14,0.85) 0%, rgba(3,13,8,0.75) 100%);
-      border: 1px solid rgba(0,196,94,0.28);
-      box-shadow: 0 12px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(0,196,94,0.14);
+    /* rank 4 — Earth Steward */
+    .rank-4 {
+      background:linear-gradient(135deg,rgba(5,20,12,0.89),rgba(3,12,7,0.79));
+      border:1px solid rgba(0,255,127,0.3);
+      box-shadow:0 14px 58px rgba(0,0,0,0.6),inset 0 1px 0 rgba(0,255,127,0.15);
     }
-    .rank-3 .rank-panel:hover { box-shadow: 0 28px 72px rgba(0,0,0,0.6), 0 0 48px rgba(0,196,94,0.2), inset 0 1px 0 rgba(0,196,94,0.18); }
-    .rank-3 .rank-panel::after { background: linear-gradient(90deg, transparent, #00c45e, transparent); }
-    .rank-3 .rank-node-dot { border-color: #00c45e; box-shadow: 0 0 14px rgba(0,196,94,0.7); }
-    .rank-3 .rank-num { color: rgba(0,196,94,0.5); }
-    .rank-3 .rank-name { color: #55e090; }
-    .rank-3 .rank-price { color: #00c45e; }
-    .rank-3 .rank-icon { color: #00c45e; text-shadow: 0 0 32px rgba(0,196,94,0.8); }
-    .rank-3 .claim-btn.unclaimed { background: rgba(0,196,94,0.1); border-color: rgba(0,196,94,0.45); color: #55e090; }
-    .rank-3 .claim-btn.unclaimed:hover:not(:disabled) { background: #00c45e; color: #040d06; }
+    .rank-4:hover { box-shadow:0 34px 84px rgba(0,0,0,0.65),0 0 58px rgba(0,255,127,0.22); }
+    .rank-4 .top-bar { background:linear-gradient(90deg,transparent,#00ff7f,transparent); }
+    .rank-4 .corner-tl,.rank-4 .corner-tr,.rank-4 .corner-bl,.rank-4 .corner-br { border-color:rgba(0,255,127,0.65); }
+    .rank-4 .rank-num  { color:rgba(0,255,127,0.5); }
+    .rank-4 .rank-name { color:#88ffcc; }
+    .rank-4 .rank-price{ color:#00ff7f; }
+    .rank-4 .rank-icon { color:#00ff7f; text-shadow:0 0 36px rgba(0,255,127,0.9); }
 
-    /* ── rank 4 — EARTH STEWARD ── */
-    .rank-4 .rank-panel {
-      background: linear-gradient(135deg, rgba(5,20,12,0.88) 0%, rgba(3,12,7,0.78) 100%);
-      border: 1px solid rgba(0,255,127,0.3);
-      box-shadow: 0 14px 56px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,255,127,0.15);
+    /* rank 5 — Legendary Sentinel */
+    .rank-5 {
+      background:linear-gradient(135deg,rgba(22,18,4,0.91),rgba(12,10,2,0.83));
+      border:1px solid rgba(255,224,102,0.35);
+      box-shadow:0 16px 66px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,224,102,0.18);
     }
-    .rank-4 .rank-panel:hover { box-shadow: 0 32px 80px rgba(0,0,0,0.65), 0 0 56px rgba(0,255,127,0.22), inset 0 1px 0 rgba(0,255,127,0.2); }
-    .rank-4 .rank-panel::after { background: linear-gradient(90deg, transparent, #00ff7f, transparent); }
-    .rank-4 .rank-node-dot { border-color: #00ff7f; box-shadow: 0 0 16px rgba(0,255,127,0.8); }
-    .rank-4 .rank-num { color: rgba(0,255,127,0.5); }
-    .rank-4 .rank-name { color: #88ffcc; }
-    .rank-4 .rank-price { color: #00ff7f; }
-    .rank-4 .rank-icon { color: #00ff7f; text-shadow: 0 0 36px rgba(0,255,127,0.9); }
-    .rank-4 .claim-btn.unclaimed { background: rgba(0,255,127,0.08); border-color: rgba(0,255,127,0.4); color: #88ffcc; }
-    .rank-4 .claim-btn.unclaimed:hover:not(:disabled) { background: #00ff7f; color: #040d06; }
+    .rank-5:hover { box-shadow:0 38px 94px rgba(0,0,0,0.7),0 0 68px rgba(255,224,102,0.25); }
+    .rank-5 .top-bar { background:linear-gradient(90deg,transparent,#ffe066,#d4a017,#ffe066,transparent); }
+    .rank-5 .corner-tl,.rank-5 .corner-tr,.rank-5 .corner-bl,.rank-5 .corner-br { border-color:rgba(255,224,102,0.6); }
+    .rank-5 .rank-num  { color:rgba(212,160,23,0.6); }
+    .rank-5 .rank-name { color:#ffe066; text-shadow:0 0 20px rgba(255,224,102,0.4); }
+    .rank-5 .rank-price{ color:#ffe066; }
+    .rank-5 .rank-icon { color:#ffe066; text-shadow:0 0 40px rgba(255,224,102,1); }
 
-    /* ── rank 5 — LEGENDARY SENTINEL ── */
-    .rank-5 .rank-panel {
-      background: linear-gradient(135deg, rgba(22,18,4,0.9) 0%, rgba(12,10,2,0.82) 100%);
-      border: 1px solid rgba(255,224,102,0.35);
-      box-shadow: 0 16px 64px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,224,102,0.18);
-    }
-    .rank-5 .rank-panel:hover { box-shadow: 0 36px 90px rgba(0,0,0,0.7), 0 0 64px rgba(255,224,102,0.25), inset 0 1px 0 rgba(255,224,102,0.22); }
-    .rank-5 .rank-panel::after { background: linear-gradient(90deg, transparent, #ffe066, #d4a017, #ffe066, transparent); }
-    .rank-5 .rank-node-dot { border-color: #ffe066; box-shadow: 0 0 20px rgba(255,224,102,0.9); }
-    .rank-5 .rank-num { color: rgba(212,160,23,0.6); }
-    .rank-5 .rank-name { color: #ffe066; text-shadow: 0 0 20px rgba(255,224,102,0.4); }
-    .rank-5 .rank-price { color: #ffe066; }
-    .rank-5 .rank-icon { color: #ffe066; text-shadow: 0 0 40px rgba(255,224,102,1); }
-    .rank-5 .claim-btn.unclaimed {
-      background: linear-gradient(135deg, rgba(212,160,23,0.12), rgba(255,224,102,0.08));
-      border-color: rgba(255,224,102,0.45); color: #ffe066;
-    }
-    .rank-5 .claim-btn.unclaimed:hover:not(:disabled) {
-      background: linear-gradient(135deg, #d4a017, #ffe066);
-      color: #040d06;
-    }
-
-    /* ══════════════════════════════
-       PANEL INTERNALS
-    ══════════════════════════════ */
-    .panel-inner {
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-    }
+    /* ══ PANEL CONTENT ══ */
+    .panel-inner { display:flex; align-items:flex-start; gap:16px; }
 
     .rank-icon {
-      font-size: 42px;
-      line-height: 1;
-      flex-shrink: 0;
-      margin-top: 2px;
-      filter: drop-shadow(0 0 12px currentColor);
-      transition: transform 0.3s;
+      font-size:38px; line-height:1; flex-shrink:0; margin-top:2px;
+      filter:drop-shadow(0 0 10px currentColor);
+      transition:transform 0.3s;
     }
-    .rank-panel:hover .rank-icon { transform: scale(1.12) rotate(-5deg); }
+    .rank-panel:hover .rank-icon { transform:scale(1.14) rotate(-6deg); }
 
-    .panel-text { flex: 1; }
+    .panel-text { flex:1; }
 
     .rank-num {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 4px;
+      font-family:var(--cc); font-size:9px; letter-spacing:4px;
+      text-transform:uppercase; margin-bottom:4px;
     }
-
     .rank-name {
-      font-family: 'Cinzel', serif;
-      font-size: clamp(18px, 3vw, 26px);
-      font-weight: 700;
-      letter-spacing: 2px;
-      line-height: 1.1;
-      margin-bottom: 6px;
+      font-family:var(--cinzel); font-size:clamp(16px,2.5vw,22px);
+      font-weight:700; letter-spacing:2px; line-height:1.1; margin-bottom:6px;
     }
-
     .rank-desc {
-      font-family: var(--font-body);
-      font-size: 12px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.38);
-      letter-spacing: 0.5px;
-      line-height: 1.6;
-      margin-bottom: 16px;
+      font-family:var(--cc); font-size:11px; font-weight:300;
+      color:rgba(255,255,255,0.35); letter-spacing:0.3px;
+      line-height:1.65; margin-bottom:14px;
     }
-
     .rank-price {
-      font-family: var(--font-mono);
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
+      font-family:var(--cc); font-size:15px; font-weight:600;
+      letter-spacing:2px; margin-bottom:14px;
     }
 
-    /* ══════════════════════════════
-       CLAIM BUTTON
-    ══════════════════════════════ */
+    /* ══ CLAIM BUTTON — grey until claimed ══ */
     .claim-btn {
-      padding: 12px 28px;
-      border: 1px solid;
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.25s;
-      border-radius: 3px;
-      background: transparent;
+      padding:11px 24px;
+      font-family:var(--cc); font-size:11px; font-weight:600;
+      letter-spacing:3px; text-transform:uppercase;
+      cursor:pointer; transition:all 0.25s; border-radius:3px;
+      border:1px solid;
     }
-    .claim-btn.unclaimed:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* UNCLAIMED — always grey */
+    .claim-btn.unclaimed {
+      background:rgba(120,140,125,0.1);
+      border-color:rgba(150,170,155,0.35);
+      color:rgba(180,200,185,0.65);
+    }
+    .claim-btn.unclaimed:hover:not(:disabled) {
+      background:rgba(150,170,155,0.18);
+      border-color:rgba(180,200,185,0.55);
+      color:rgba(220,240,225,0.9);
+    }
+    .claim-btn.unclaimed:disabled {
+      opacity:0.35; cursor:not-allowed;
+    }
+
+    /* CLAIMED — luminous green for ranks 0-4 */
     .claim-btn.claimed {
-      background: rgba(0,255,127,0.12);
-      border-color: rgba(0,255,127,0.3);
-      color: var(--green);
-      cursor: default;
-      letter-spacing: 3px;
+      background:rgba(0,255,127,0.1);
+      border-color:rgba(0,255,127,0.5);
+      color:#00ff7f;
+      cursor:default;
+      text-shadow:0 0 12px rgba(0,255,127,0.6);
+      box-shadow:0 0 16px rgba(0,255,127,0.1), inset 0 0 12px rgba(0,255,127,0.05);
+      animation:claimedGlow 2.5s ease-in-out infinite alternate;
     }
+    @keyframes claimedGlow {
+      from { box-shadow:0 0 10px rgba(0,255,127,0.1),inset 0 0 8px rgba(0,255,127,0.04); }
+      to   { box-shadow:0 0 24px rgba(0,255,127,0.18),inset 0 0 16px rgba(0,255,127,0.08); }
+    }
+
+    /* CLAIMED — golden for rank 5 (Legendary Sentinel) */
     .rank-5 .claim-btn.claimed {
-      background: rgba(255,224,102,0.1);
-      border-color: rgba(255,224,102,0.3);
-      color: #ffe066;
+      background:rgba(255,224,102,0.1);
+      border-color:rgba(255,224,102,0.55);
+      color:#ffe066;
+      text-shadow:0 0 14px rgba(255,224,102,0.7);
+      box-shadow:0 0 18px rgba(255,224,102,0.12),inset 0 0 12px rgba(255,224,102,0.06);
+      animation:claimedGold 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes claimedGold {
+      from { box-shadow:0 0 12px rgba(255,224,102,0.12),inset 0 0 8px rgba(255,224,102,0.05); }
+      to   { box-shadow:0 0 28px rgba(255,224,102,0.22),inset 0 0 18px rgba(255,224,102,0.1); }
     }
 
-    /* ══════════════════════════════
-       SOCIAL + GRAV MINING FOOTER
-    ══════════════════════════════ */
-    .footer-section {
-      margin-top: 72px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .footer-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 5px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .social-row {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-    }
+    /* ══ FOOTER ══ */
+    .footer-section { margin-top:64px; width:100%; display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .footer-label { font-family:var(--cc); font-size:10px; letter-spacing:5px; color:var(--muted); text-transform:uppercase; }
+    .social-row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; }
 
     .social-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 28px;
-      border: 1px solid;
-      font-family: var(--font-body); font-size: 12px;
-      font-weight: 600; letter-spacing: 3px;
-      text-transform: uppercase; text-decoration: none;
-      transition: all 0.2s; border-radius: 3px;
+      display:flex; align-items:center; gap:10px;
+      padding:12px 26px; border:1px solid;
+      font-family:var(--cc); font-size:11px; font-weight:500;
+      letter-spacing:3px; text-transform:uppercase; text-decoration:none;
+      transition:all 0.2s; border-radius:3px;
     }
-
-    .social-btn.twitter {
-      border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.55);
-      background: rgba(255,255,255,0.02);
-    }
-    .social-btn.twitter:hover { border-color: rgba(255,255,255,0.4); color: #fff; background: rgba(255,255,255,0.06); }
-
-    .social-btn.telegram {
-      border-color: rgba(41,182,246,0.3); color: rgba(41,182,246,0.7);
-      background: rgba(41,182,246,0.03);
-    }
-    .social-btn.telegram:hover { border-color: #29b6f6; color: #29b6f6; background: rgba(41,182,246,0.08); }
-
+    .social-btn.twitter { border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.55); background:rgba(255,255,255,0.02); }
+    .social-btn.twitter:hover { border-color:rgba(255,255,255,0.4); color:#fff; background:rgba(255,255,255,0.06); }
+    .social-btn.telegram { border-color:rgba(41,182,246,0.3); color:rgba(41,182,246,0.7); background:rgba(41,182,246,0.03); }
+    .social-btn.telegram:hover { border-color:#29b6f6; color:#29b6f6; background:rgba(41,182,246,0.08); }
     .social-btn.grav-mining {
-      border-color: rgba(212,160,23,0.5);
-      color: #ffe066;
-      background: linear-gradient(135deg, rgba(212,160,23,0.1), rgba(255,224,102,0.06));
-      box-shadow: 0 0 20px rgba(212,160,23,0.1);
-      animation: goldPulse 3s ease-in-out infinite;
+      border-color:rgba(212,160,23,0.5); color:#ffe066;
+      background:linear-gradient(135deg,rgba(212,160,23,0.1),rgba(255,224,102,0.06));
+      animation:goldPulse 3s ease-in-out infinite;
     }
-    .social-btn.grav-mining:hover {
-      background: linear-gradient(135deg, rgba(212,160,23,0.25), rgba(255,224,102,0.15));
-      border-color: #ffe066;
-      box-shadow: 0 0 40px rgba(255,224,102,0.2);
-      transform: translateY(-2px);
-    }
-    @keyframes goldPulse {
-      0%,100% { box-shadow: 0 0 20px rgba(212,160,23,0.1); }
-      50%      { box-shadow: 0 0 36px rgba(212,160,23,0.2), 0 0 60px rgba(255,224,102,0.08); }
-    }
+    .social-btn.grav-mining:hover { background:linear-gradient(135deg,rgba(212,160,23,0.25),rgba(255,224,102,0.15)); border-color:#ffe066; transform:translateY(-2px); }
+    @keyframes goldPulse { 0%,100%{box-shadow:0 0 18px rgba(212,160,23,0.1)} 50%{box-shadow:0 0 34px rgba(212,160,23,0.22),0 0 56px rgba(255,224,102,0.08)} }
+    .social-btn svg { width:14px; height:14px; flex-shrink:0; }
 
-    .social-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .copyright { font-family:var(--cc); font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.1); text-align:center; padding-bottom:8px; }
 
-    .copyright {
-      font-family: var(--font-mono);
-      font-size: 10px; letter-spacing: 2px;
-      color: rgba(255,255,255,0.1);
-      text-align: center;
-      padding-bottom: 8px;
-    }
+    /* ══ DIVIDER ══ */
+    .gold-line { width:100%; height:1px; background:linear-gradient(90deg,transparent,rgba(212,160,23,0.3),rgba(0,255,127,0.3),rgba(212,160,23,0.3),transparent); margin:48px 0 0; opacity:0.6; }
 
-    /* ══════════════════════════════
-       STATUS TOAST
-    ══════════════════════════════ */
+    /* ══ TOAST ══ */
     #statusMsg {
-      position: fixed; bottom: 28px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(4,13,6,0.95);
-      border: 1px solid rgba(0,255,127,0.15);
-      color: var(--text);
-      font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px;
-      padding: 14px 28px; z-index: 200;
-      opacity: 0; transition: opacity 0.3s;
-      pointer-events: none; white-space: nowrap;
-      max-width: 90vw; text-align: center;
-      backdrop-filter: blur(12px); border-radius: 3px;
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+      background:rgba(4,13,6,0.95); border:1px solid rgba(0,255,127,0.15); color:var(--text);
+      font-family:var(--cc); font-size:11px; letter-spacing:2px;
+      padding:14px 28px; z-index:200; opacity:0; transition:opacity 0.3s;
+      pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center;
+      backdrop-filter:blur(12px); border-radius:3px;
     }
-    #statusMsg.show    { opacity: 1; }
-    #statusMsg.error   { border-color: rgba(255,60,60,0.4); color: #ff7777; }
-    #statusMsg.success { border-color: rgba(0,255,127,0.4); color: var(--green); }
+    #statusMsg.show    { opacity:1; }
+    #statusMsg.error   { border-color:rgba(255,60,60,0.4); color:#ff7777; }
+    #statusMsg.success { border-color:rgba(0,255,127,0.4); color:var(--green); }
 
-    /* ══════════════════════════════
-       LOADING OVERLAY
-    ══════════════════════════════ */
+    /* ══ LOADING ══ */
     #loadingOverlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(4,13,6,0.9); z-index: 150;
-      align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px;
-      backdrop-filter: blur(6px);
+      display:none; position:fixed; inset:0; background:rgba(4,13,6,0.9);
+      z-index:150; align-items:center; justify-content:center;
+      flex-direction:column; gap:16px; backdrop-filter:blur(6px);
     }
-    #loadingOverlay.active { display: flex; }
-    .loading-text {
-      font-family: var(--font-head);
-      font-size: 20px; letter-spacing: 8px; color: var(--green);
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-    .loading-sub {
-      font-family: var(--font-mono);
-      font-size: 10px; letter-spacing: 4px; color: var(--muted);
-    }
-    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    #loadingOverlay.active { display:flex; }
+    .loading-text { font-family:var(--cinzel); font-size:20px; letter-spacing:8px; color:var(--green); animation:pulse 1.4s ease-in-out infinite; }
+    .loading-sub  { font-family:var(--cc); font-size:10px; letter-spacing:4px; color:var(--muted); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* ══════════════════════════════
-       DIVIDER LINE
-    ══════════════════════════════ */
-    .gold-line {
-      width: 100%; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(212,160,23,0.3), rgba(0,255,127,0.3), rgba(212,160,23,0.3), transparent);
-      margin: 48px 0 0;
-      opacity: 0.6;
-    }
-
-    @media (max-width: 500px) {
-      .social-btn { padding: 11px 18px; font-size: 11px; }
+    @media(max-width:500px){
+      .social-btn { padding:10px 16px; font-size:10px; }
+      .rank-panel { padding:20px 16px 18px; }
+      .rank-icon  { font-size:28px; }
+      .rank-name  { font-size:15px; }
+      .rank-price { font-size:13px; }
+      .rank-desc  { font-size:10px; }
+      .claim-btn  { padding:10px 16px; font-size:10px; letter-spacing:2px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══ FOREST CANVAS ══ -->
 <canvas id="forestCanvas"></canvas>
-
-<!-- ══ THEME TOGGLE ══ -->
 <button id="themeToggle" onclick="toggleTheme()">☀ LIGHT</button>
 
-<!-- ══ WALLET MODAL ══ -->
+<!-- WALLET MODAL -->
 <div class="wallet-modal-overlay" id="walletModal">
   <div class="wallet-modal">
     <button class="wallet-modal-close" onclick="closeWalletModal()">✕</button>
     <div class="wallet-modal-title">Connect Wallet</div>
-
     <button class="wallet-option" onclick="connectWith('metamask')">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MM"/>
       <div>MetaMask<span class="wallet-option-sub">Browser extension · Desktop</span></div>
     </button>
-
     <button class="wallet-option" onclick="connectWith('core')">
       <div class="core-logo">CORE</div>
       <div>Core Wallet<span class="wallet-option-sub">Native AVAX wallet · Recommended</span></div>
     </button>
-
     <div class="wallet-divider">── or open in app ──</div>
-
     <button class="wallet-option" onclick="openInMetaMaskApp()">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask Mobile"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MM Mobile"/>
       <div>MetaMask Mobile<span class="wallet-option-sub">Opens MetaMask app on your phone</span></div>
     </button>
   </div>
 </div>
 
-<!-- ══ MAIN CONTENT ══ -->
+<!-- MAIN -->
 <div class="content">
 
   <div class="header-area">
@@ -751,18 +527,15 @@
     <div id="walletInfo"></div>
   </div>
 
-  <!-- SECTION HEADER -->
   <div class="section-wrap">
     <div class="section-title">Claim Your Conservation Ranks</div>
-    <div class="section-sub">Each rank unlocks $GRAV rewards · staking multipliers · NFTs · exclusive access · All on-chain</div>
+    <div class="section-sub">Each rank unlocks $GRAV rewards · staking multipliers · NFTs and exclusive access · All on-chain</div>
   </div>
 
-  <!-- RANK JOURNEY -->
-  <div class="rank-journey" id="rankJourney"></div>
+  <div class="rank-grid" id="rankGrid"></div>
 
   <div class="gold-line"></div>
 
-  <!-- FOOTER -->
   <div class="footer-section">
     <div class="footer-label">Join the Network</div>
     <div class="social-row">
@@ -778,7 +551,7 @@
       </a>
 
       <a class="social-btn grav-mining" href="https://mine.greenavax.xyz" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         $GRAV Mining
       </a>
 
@@ -788,7 +561,6 @@
 
 </div>
 
-<!-- STATUS + LOADING -->
 <div id="statusMsg"></div>
 <div id="loadingOverlay">
   <div class="loading-text">PROCESSING</div>
@@ -796,9 +568,7 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════
+// ══ CONFIG ══════════════════════════════════
 const CONTRACT_ADDRESS = "0xB2eE32B742ad50C023362bCd8e1A8f23F6D96859";
 const ABI = [
   "function claimRank(uint8 rankIndex) payable",
@@ -811,7 +581,7 @@ const RANKS = [
   { name:"Sprout",             price:"0.01", icon:"🌱", desc:"The first seed of impact. You are now part of the on-chain conservation network." },
   { name:"Conservationist",    price:"0.1",  icon:"🌿", desc:"A core guardian of the ecosystem. Your commitment is recorded forever on-chain." },
   { name:"Forest Guardian",    price:"0.5",  icon:"🌳", desc:"You protect entire ecosystems. A trusted steward of the digital forest." },
-  { name:"Carbon Warden",      price:"1",    icon:"⚡",  desc:"A climate defender of the highest order. Rare multipliers await your dedication." },
+  { name:"Carbon Warden",      price:"1",    icon:"⚡",  desc:"Climate defender of the highest order. Rare multipliers await your dedication." },
   { name:"Earth Steward",      price:"10",   icon:"🌍",  desc:"High-level caretaker of the planetary network. Among the most committed guardians." },
   { name:"Legendary Sentinel", price:"50",   icon:"👑",  desc:"Mythic. Untouchable. The apex guardian of the GREENAVAX protocol. Exclusive forever." }
 ];
@@ -820,47 +590,29 @@ const AVAX_CHAIN_ID = "0xa86a";
 let provider, signer, contract, userAddress;
 let claimedRanks = [false,false,false,false,false,false];
 
-// ══════════════════════════════════════════
-//  WALLET MODAL
-// ══════════════════════════════════════════
-function openWalletModal() {
-  if (userAddress) return;
-  document.getElementById("walletModal").classList.add("active");
-}
-function closeWalletModal() {
-  document.getElementById("walletModal").classList.remove("active");
-}
-document.getElementById("walletModal").addEventListener("click", function(e) {
-  if (e.target === this) closeWalletModal();
-});
-function openInMetaMaskApp() {
-  window.location.href = "https://metamask.app.link/dapp/greenavax.xyz";
-}
+// ══ WALLET MODAL ════════════════════════════
+function openWalletModal() { if (userAddress) return; document.getElementById("walletModal").classList.add("active"); }
+function closeWalletModal() { document.getElementById("walletModal").classList.remove("active"); }
+document.getElementById("walletModal").addEventListener("click", function(e){ if(e.target===this)closeWalletModal(); });
+function openInMetaMaskApp() { window.location.href = "https://metamask.app.link/dapp/greenavax.xyz"; }
 async function connectWith(type) {
   closeWalletModal();
-  if (!window.ethereum) {
-    showStatus(type === 'metamask' ? "No wallet found. Use MetaMask Mobile." : "No wallet found. Install Core Wallet.", "error");
-    return;
-  }
+  if (!window.ethereum) { showStatus(type==='metamask'?"No wallet found. Use MetaMask Mobile.":"No wallet found. Install Core Wallet.", "error"); return; }
   await connectWallet();
 }
 
-// ══════════════════════════════════════════
-//  CONNECT
-// ══════════════════════════════════════════
+// ══ CONNECT ════════════════════════════════
 async function ensureAvaxNetwork() {
-  const chainId = await window.ethereum.request({ method: "eth_chainId" });
+  const chainId = await window.ethereum.request({ method:"eth_chainId" });
   if (chainId !== AVAX_CHAIN_ID) {
-    try {
-      await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{chainId:AVAX_CHAIN_ID}] });
-    } catch(err) {
+    try { await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{chainId:AVAX_CHAIN_ID}] }); }
+    catch(err) {
       if (err.code === 4902) {
         await window.ethereum.request({ method:"wallet_addEthereumChain", params:[{
-          chainId: AVAX_CHAIN_ID,
-          chainName: "Avalanche C-Chain",
-          nativeCurrency: {name:"AVAX",symbol:"AVAX",decimals:18},
-          rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
-          blockExplorerUrls: ["https://snowtrace.io/"]
+          chainId:AVAX_CHAIN_ID, chainName:"Avalanche C-Chain",
+          nativeCurrency:{name:"AVAX",symbol:"AVAX",decimals:18},
+          rpcUrls:["https://api.avax.network/ext/bc/C/rpc"],
+          blockExplorerUrls:["https://snowtrace.io/"]
         }]});
       } else throw err;
     }
@@ -882,77 +634,49 @@ async function connectWallet() {
     btn.classList.add("connected");
     document.getElementById("walletInfo").textContent = "AVAX C-CHAIN · MAINNET · CONNECTED";
     await loadRanks();
-    window.ethereum.on("accountsChanged", () => location.reload());
-    window.ethereum.on("chainChanged",    () => location.reload());
-  } catch(err) {
-    showStatus(err.message || "Connection failed.", "error");
-  }
+    window.ethereum.on("accountsChanged", ()=>location.reload());
+    window.ethereum.on("chainChanged",    ()=>location.reload());
+  } catch(err) { showStatus(err.message||"Connection failed.", "error"); }
 }
 
-// ══════════════════════════════════════════
-//  LOAD RANKS
-// ══════════════════════════════════════════
+// ══ RANKS ═══════════════════════════════════
 async function loadRanks() {
-  try {
-    claimedRanks = await contract.getRanks(userAddress);
-    renderJourney();
-  } catch(err) {
-    showStatus("Could not load ranks.", "error");
-    renderJourney();
-  }
+  try { claimedRanks = await contract.getRanks(userAddress); renderGrid(); }
+  catch(err) { showStatus("Could not load ranks.", "error"); renderGrid(); }
 }
 
-// ══════════════════════════════════════════
-//  RENDER JOURNEY
-// ══════════════════════════════════════════
-function renderJourney() {
-  const journey = document.getElementById("rankJourney");
-  journey.innerHTML = "";
-
+function renderGrid() {
+  const grid = document.getElementById("rankGrid");
+  grid.innerHTML = "";
   RANKS.forEach((rank, i) => {
     const claimed  = claimedRanks[i];
     const disabled = claimed || !userAddress;
-    const isEven   = i % 2 === 1;
-
-    const row = document.createElement("div");
-    row.className = `rank-row rank-${i}`;
-
-    const panelHTML = `
-      <div class="rank-panel">
-        <div class="panel-inner">
-          <div class="rank-icon">${rank.icon}</div>
-          <div class="panel-text">
-            <div class="rank-num">Rank 0${i+1}</div>
-            <div class="rank-name">${rank.name}</div>
-            <div class="rank-desc">${rank.desc}</div>
-            <div class="rank-price">${rank.price} AVAX</div>
-            <button
-              class="claim-btn ${claimed ? 'claimed' : 'unclaimed'}"
-              id="btn-${i}"
-              onclick="claimRank(${i})"
-              ${disabled ? 'disabled' : ''}
-            >${claimed ? '✦ CLAIMED' : 'Get Rank'}</button>
-          </div>
+    const card = document.createElement("div");
+    card.className = `rank-panel rank-${i}`;
+    card.innerHTML = `
+      <div class="top-bar"></div>
+      <div class="shine"></div>
+      <div class="corner-tl"></div><div class="corner-tr"></div>
+      <div class="corner-bl"></div><div class="corner-br"></div>
+      <div class="panel-inner">
+        <div class="rank-icon">${rank.icon}</div>
+        <div class="panel-text">
+          <div class="rank-num">Rank 0${i+1}</div>
+          <div class="rank-name">${rank.name}</div>
+          <div class="rank-desc">${rank.desc}</div>
+          <div class="rank-price">${rank.price} AVAX</div>
+          <button class="claim-btn ${claimed?'claimed':'unclaimed'}"
+            id="btn-${i}" onclick="claimRank(${i})"
+            ${disabled?'disabled':''}>
+            ${claimed ? '✦ CLAIMED' : 'Get Rank'}
+          </button>
         </div>
-      </div>
-    `;
-
-    const nodeHTML = `
-      <div class="rank-node">
-        <div class="rank-node-dot"></div>
-      </div>
-    `;
-
-    const spacerHTML = `<div class="rank-spacer"></div>`;
-
-    row.innerHTML = panelHTML + nodeHTML + spacerHTML;
-    journey.appendChild(row);
+      </div>`;
+    grid.appendChild(card);
   });
 }
 
-// ══════════════════════════════════════════
-//  CLAIM RANK
-// ══════════════════════════════════════════
+// ══ CLAIM ════════════════════════════════════
 async function claimRank(rankIndex) {
   if (!contract) { showStatus("Connect your wallet first.", "error"); return; }
   const rank  = RANKS[rankIndex];
@@ -964,210 +688,165 @@ async function claimRank(rankIndex) {
     await tx.wait();
     showStatus(`${rank.name} claimed! Welcome, Guardian.`, "success");
     claimedRanks[rankIndex] = true;
-    renderJourney();
+    renderGrid();
   } catch(err) {
     const msg = err?.reason || err?.message || "Transaction failed.";
-    showStatus(msg.length > 90 ? msg.slice(0,90)+"…" : msg, "error");
-  } finally {
-    setLoading(false);
-  }
+    showStatus(msg.length>90 ? msg.slice(0,90)+"…" : msg, "error");
+  } finally { setLoading(false); }
 }
 
-// ══════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════
-function setLoading(on) {
-  document.getElementById("loadingOverlay").classList.toggle("active", on);
-}
+// ══ HELPERS ══════════════════════════════════
+function setLoading(on) { document.getElementById("loadingOverlay").classList.toggle("active",on); }
 let _st;
 function showStatus(msg, type) {
   const el = document.getElementById("statusMsg");
   el.textContent = msg;
-  el.className = "show" + (type ? " "+type : "");
-  clearTimeout(_st);
-  _st = setTimeout(() => { el.className = ""; }, 5000);
+  el.className = "show"+(type?" "+type:"");
+  clearTimeout(_st); _st = setTimeout(()=>{ el.className=""; }, 5000);
 }
+
+// ══ THEME TOGGLE — fully functional ══════════
 function toggleTheme() {
   const isLight = document.body.classList.toggle("light");
   document.getElementById("themeToggle").textContent = isLight ? "☾ DARK" : "☀ LIGHT";
 }
 
-// ══════════════════════════════════════════
-//  DIGITAL FOREST CANVAS
-// ══════════════════════════════════════════
-(function() {
+// ══ DIGITAL FOREST CANVAS ════════════════════
+(function(){
   const canvas = document.getElementById("forestCanvas");
   const ctx    = canvas.getContext("2d");
-  let W, H, nodes = [], roots = [], particles = [];
+  let W, H, nodes=[], roots=[], particles=[];
 
-  function resize() {
+  function resize(){
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
     initScene();
   }
 
-  function initScene() {
-    // network nodes
-    nodes = [];
-    const count = Math.floor((W * H) / 8000);
-    for (let i = 0; i < count; i++) {
+  function initScene(){
+    nodes=[];
+    const count = Math.floor((W*H)/8000);
+    for(let i=0;i<count;i++){
       nodes.push({
-        x:  Math.random() * W,
-        y:  Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.18,
-        vy: (Math.random() - 0.5) * 0.18,
-        r:  Math.random() * 1.8 + 0.4,
-        hue: Math.random() > 0.7 ? 45 : 140,
-        pulse: Math.random() * Math.PI * 2
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.18, vy:(Math.random()-0.5)*0.18,
+        r:Math.random()*1.8+0.4,
+        hue:Math.random()>0.7?45:140,
+        pulse:Math.random()*Math.PI*2
       });
     }
-
-    // glowing roots (static bezier anchors)
-    roots = [];
-    const rootCount = 6;
-    for (let i = 0; i < rootCount; i++) {
+    roots=[];
+    for(let i=0;i<6;i++){
       roots.push({
-        x1: Math.random() * W,
-        y1: H,
-        cx1: Math.random() * W,
-        cy1: H * 0.5 + Math.random() * H * 0.3,
-        cx2: Math.random() * W,
-        cy2: H * 0.2 + Math.random() * H * 0.3,
-        x2: Math.random() * W,
-        y2: Math.random() * H * 0.4,
-        hue: 140,
-        alpha: Math.random() * 0.04 + 0.02,
-        width: Math.random() * 1.2 + 0.3
+        x1:Math.random()*W, y1:H,
+        cx1:Math.random()*W, cy1:H*0.5+Math.random()*H*0.3,
+        cx2:Math.random()*W, cy2:H*0.2+Math.random()*H*0.3,
+        x2:Math.random()*W, y2:Math.random()*H*0.4,
+        alpha:Math.random()*0.04+0.02, width:Math.random()*1.2+0.3
       });
     }
-
-    // floating particles
-    particles = [];
-    for (let i = 0; i < 40; i++) {
+    particles=[];
+    for(let i=0;i<40;i++){
       particles.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vy: -(Math.random() * 0.3 + 0.1),
-        vx: (Math.random() - 0.5) * 0.15,
-        r:  Math.random() * 1.5 + 0.3,
-        alpha: Math.random() * 0.5 + 0.1,
-        hue: Math.random() > 0.6 ? 45 : 140,
-        life: Math.random()
+        x:Math.random()*W, y:Math.random()*H,
+        vy:-(Math.random()*0.3+0.1), vx:(Math.random()-0.5)*0.15,
+        r:Math.random()*1.5+0.3, alpha:Math.random()*0.5+0.1,
+        hue:Math.random()>0.6?45:140, life:Math.random()
       });
     }
   }
 
-  let frame = 0;
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    frame++;
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H); frame++;
+    const isLight = document.body.classList.contains("light");
 
-    // dark vignette
-    const vig = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W * 0.75);
-    vig.addColorStop(0,   "rgba(0,40,12,0.08)");
-    vig.addColorStop(0.6, "rgba(0,20,6,0.04)");
-    vig.addColorStop(1,   "rgba(0,0,0,0.25)");
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, W, H);
+    // radial glow
+    const vig = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.75);
+    if(isLight){
+      vig.addColorStop(0,"rgba(0,120,50,0.06)");
+      vig.addColorStop(1,"rgba(0,0,0,0)");
+    } else {
+      vig.addColorStop(0,"rgba(0,40,12,0.08)");
+      vig.addColorStop(0.6,"rgba(0,20,6,0.04)");
+      vig.addColorStop(1,"rgba(0,0,0,0.22)");
+    }
+    ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
 
-    // glowing roots
-    roots.forEach(r => {
-      ctx.beginPath();
-      ctx.moveTo(r.x1, r.y1);
-      ctx.bezierCurveTo(r.cx1, r.cy1, r.cx2, r.cy2, r.x2, r.y2);
-      ctx.strokeStyle = `hsla(${r.hue}, 80%, 45%, ${r.alpha})`;
-      ctx.lineWidth = r.width;
-      ctx.stroke();
+    // roots
+    roots.forEach(r=>{
+      ctx.beginPath(); ctx.moveTo(r.x1,r.y1);
+      ctx.bezierCurveTo(r.cx1,r.cy1,r.cx2,r.cy2,r.x2,r.y2);
+      const lum = isLight ? 35 : 45;
+      ctx.strokeStyle=`hsla(140,75%,${lum}%,${r.alpha*(isLight?0.6:1)})`;
+      ctx.lineWidth=r.width; ctx.stroke();
     });
 
-    // connections between nodes
-    const DIST = 120;
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i+1; j < nodes.length; j++) {
-        const dx   = nodes[i].x - nodes[j].x;
-        const dy   = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < DIST) {
-          const alpha = (1 - dist/DIST) * 0.14;
-          const hue   = (nodes[i].hue + nodes[j].hue) / 2;
-          ctx.strokeStyle = `hsla(${hue}, 80%, 55%, ${alpha})`;
-          ctx.lineWidth   = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.stroke();
+    // connections
+    const DIST=120;
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<DIST){
+          const alpha=(1-dist/DIST)*(isLight?0.18:0.13);
+          const hue=(nodes[i].hue+nodes[j].hue)/2;
+          const lum=isLight?35:55;
+          ctx.strokeStyle=`hsla(${hue},80%,${lum}%,${alpha})`;
+          ctx.lineWidth=0.6; ctx.beginPath();
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
         }
       }
     }
 
-    // nodes with pulse
-    nodes.forEach(n => {
-      n.pulse += 0.02;
-      const pulse = Math.sin(n.pulse) * 0.5 + 0.5;
-      const alpha = 0.3 + pulse * 0.35;
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r * (1 + pulse * 0.3), 0, Math.PI*2);
-      ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, ${alpha})`;
-      ctx.fill();
-
-      // energy glow ring on some nodes
-      if (n.r > 1.4) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r * 3, 0, Math.PI*2);
-        ctx.strokeStyle = `hsla(${n.hue}, 90%, 65%, ${pulse * 0.06})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
+    // nodes
+    nodes.forEach(n=>{
+      n.pulse+=0.02;
+      const p=Math.sin(n.pulse)*0.5+0.5;
+      const alpha=0.3+p*0.35;
+      const lum=isLight?35:65;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r*(1+p*0.3),0,Math.PI*2);
+      ctx.fillStyle=`hsla(${n.hue},90%,${lum}%,${alpha})`; ctx.fill();
+      if(n.r>1.4){
+        ctx.beginPath(); ctx.arc(n.x,n.y,n.r*3,0,Math.PI*2);
+        ctx.strokeStyle=`hsla(${n.hue},90%,${lum}%,${p*0.06})`;
+        ctx.lineWidth=1; ctx.stroke();
       }
-
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < 0 || n.x > W) n.vx *= -1;
-      if (n.y < 0 || n.y > H) n.vy *= -1;
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
     });
 
-    // floating particles
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.life += 0.003;
-      if (p.y < -10 || p.life > 1) {
-        p.x = Math.random() * W;
-        p.y = H + 5;
-        p.life = 0;
-        p.alpha = Math.random() * 0.5 + 0.1;
-      }
-      const fade = Math.sin(p.life * Math.PI);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.alpha * fade * 0.6})`;
-      ctx.fill();
+    // particles
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.life+=0.003;
+      if(p.y<-10||p.life>1){ p.x=Math.random()*W; p.y=H+5; p.life=0; p.alpha=Math.random()*0.5+0.1; }
+      const fade=Math.sin(p.life*Math.PI);
+      const lum=isLight?35:70;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},80%,${lum}%,${p.alpha*fade*0.5})`; ctx.fill();
     });
 
-    // energy flow along connections (occasional bright pulse)
-    if (frame % 90 === 0 && nodes.length > 1) {
-      const a = nodes[Math.floor(Math.random() * nodes.length)];
-      const b = nodes[Math.floor(Math.random() * nodes.length)];
-      const grd = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-      grd.addColorStop(0, "rgba(0,255,127,0)");
-      grd.addColorStop(0.5, "rgba(0,255,127,0.25)");
-      grd.addColorStop(1, "rgba(0,255,127,0)");
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = grd;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+    // energy pulse
+    if(frame%90===0&&nodes.length>1){
+      const a=nodes[Math.floor(Math.random()*nodes.length)];
+      const b=nodes[Math.floor(Math.random()*nodes.length)];
+      const grd=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+      grd.addColorStop(0,"rgba(0,255,127,0)");
+      grd.addColorStop(0.5,"rgba(0,255,127,0.22)");
+      grd.addColorStop(1,"rgba(0,255,127,0)");
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=grd; ctx.lineWidth=1.5; ctx.stroke();
     }
 
     requestAnimationFrame(draw);
   }
 
-  resize();
-  draw();
+  resize(); draw();
   window.addEventListener("resize", resize);
 })();
 
-// ══════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════
-renderJourney();
+renderGrid();
 </script>
 </body>
 </html>
