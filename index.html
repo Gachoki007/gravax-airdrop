@@ -337,12 +337,20 @@ footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255
 <header>
   <div class="header-left">
     <div class="logo-name">GREEN AVAX</div>
-    <div class="hdr-balance-row">
-      <span class="hdr-bal-label">Balance</span>
-      <span class="hdr-bal-amount" id="gravBalDisplay">—</span>
-      <span class="hdr-bal-unit">$GRAV</span>
+    <div style="position:relative;">
+      <button class="bal-btn" id="balBtn" onclick="toggleBalPopup()" title="Click to see options">
+        <span class="hdr-bal-label">Balance</span>
+        <span class="hdr-bal-amount" id="gravBalDisplay">—</span>
+        <span class="hdr-bal-unit">$GRAV</span>
+      </button>
+      <div class="bal-popup" id="balPopup">
+        <div class="bp-amount" id="popupBalAmount">—</div>
+        <div class="bp-unit">$GRAV · AVALANCHE C-CHAIN</div>
+        <div class="bp-scan"></div>
+        <button class="bp-add-btn" onclick="addTokenToWallet()">⬡ &nbsp;ADD $GRAV TO WALLET</button>
+        <div class="bp-note">// one click · adds token to MetaMask / Core</div>
+      </div>
     </div>
-    <button class="add-token-inline" id="addTokenBtn" onclick="addTokenToWallet()" style="display:none;">+ Add $GRAV to wallet</button>
   </div>
   <div class="header-right">
     <div class="hdr-top-right">
@@ -564,9 +572,25 @@ async function refreshGravBalance(){
   try{
     const bal=await gravCtr.balanceOf(userAddr);
     const n=Number(ethers.formatEther(bal));
-    document.getElementById('gravBalDisplay').textContent=n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const fmt=n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('gravBalDisplay').textContent=fmt;
+    document.getElementById('popupBalAmount').textContent=fmt;
   }catch(e){console.warn('grav bal',e);}
 }
+
+function toggleBalPopup(){
+  const p=document.getElementById('balPopup');
+  p.classList.toggle('show');
+}
+
+// close popup when clicking outside
+document.addEventListener('click',function(e){
+  const popup=document.getElementById('balPopup');
+  const btn=document.getElementById('balBtn');
+  if(popup&&btn&&!btn.contains(e.target)&&!popup.contains(e.target)){
+    popup.classList.remove('show');
+  }
+});
 
 async function addTokenToWallet(){
   if(!window.ethereum)return;
@@ -609,7 +633,7 @@ async function connectWallet(){
     document.getElementById('hdrBtn').classList.add('live');
     document.getElementById('heroConnectWrap').style.display='none';
 
-    document.getElementById('addTokenBtn').style.display='block';
+    /* balance popup ready */
 
     for(const id of['rb-btn','rs-btn','rg-btn'])document.getElementById(id).disabled=false;
     for(const k of['b','s','g'])document.getElementById(k+'-btn').disabled=false;
