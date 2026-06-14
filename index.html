@@ -35,11 +35,38 @@ canvas#pts{position:fixed;inset:0;z-index:0;pointer-events:none;}
 /* LAYOUT */
 .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 1.5rem 5rem;}
 
-/* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 0 1.2rem;border-bottom:1px solid rgba(0,255,65,0.12);}
-.logo-name{font-family:var(--font-hud);font-size:20px;font-weight:900;color:var(--green);letter-spacing:0.18em;text-shadow:0 0 28px var(--green-glow);}
-.logo-tagline{display:none;}
-.header-right{display:flex;align-items:center;gap:14px;}
+/* ── HEADER ── */
+header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:1.4rem 0 1.2rem;
+  border-bottom:1px solid rgba(0,255,65,0.12);
+}
+
+/* LEFT BLOCK */
+.header-left{display:flex;flex-direction:column;gap:6px;}
+.logo-name{
+  font-family:var(--font-hud);font-size:20px;font-weight:900;
+  color:var(--green);letter-spacing:0.18em;
+  text-shadow:0 0 28px var(--green-glow);
+}
+.hdr-bal-row{display:flex;align-items:baseline;gap:10px;}
+.hdr-bal-label{
+  font-family:var(--font-hud);font-size:11px;font-weight:700;
+  color:rgba(255,255,255,0.4);letter-spacing:0.2em;text-transform:uppercase;
+}
+.hdr-bal-amount{
+  font-family:var(--font-hud);font-size:38px;font-weight:900;
+  color:var(--gold);letter-spacing:0.02em;line-height:1;
+  text-shadow:0 0 32px rgba(255,215,0,0.9),0 0 64px rgba(255,215,0,0.35),0 0 96px rgba(255,215,0,0.1);
+}
+.hdr-bal-unit{
+  font-family:var(--font-hud);font-size:15px;font-weight:700;
+  color:rgba(255,215,0,0.7);letter-spacing:0.18em;
+}
+
+/* RIGHT BLOCK */
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.hdr-top-right{display:flex;align-items:center;gap:10px;}
 .net-pill{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;color:rgba(0,255,65,0.45);border:1px solid rgba(0,255,65,0.12);padding:6px 14px;border-radius:2px;letter-spacing:0.1em;}
 .dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -50,16 +77,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:1.4
 .hdr-connect.live{border-color:var(--green3);color:rgba(0,255,65,0.45);font-size:9px;cursor:default;}
 .hdr-connect.live:hover{color:rgba(0,255,65,0.45);}
 .hdr-connect.live::after{display:none;}
-
-/* WALLET BAR */
-.wallet-bar{display:none!important;}
-.wallet-bar.on{display:none!important;}
-.w-addr{color:var(--green);letter-spacing:0.05em;}
-.w-chain{color:rgba(0,255,65,0.3);letter-spacing:0.15em;font-size:10px;}
-
-/* ── GRAV BALANCE BAR ── */
-.grav-bar{display:none!important;}.grav-bar.on{display:none!important;}
-/* grav bar removed */
 
 /* WALLET CHOOSER MODAL */
 .wallet-modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);backdrop-filter:blur(8px);}
@@ -270,14 +287,28 @@ header{display:flex;align-items:center;justify-content:space-between;padding:1.4
 footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255,65,0.06);margin-top:3rem;}
 .flogo{font-family:var(--font-hud);font-size:15px;color:rgba(0,255,65,0.25);letter-spacing:0.22em;margin-bottom:12px;}
 .social-links{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
-.social-link{display:flex;align-items:center;gap:8px;font-family:var(--font-hud);font-size:10px;font-weight:600;letter-spacing:0.15em;color:rgba(0,255,65,0.55);text-decoration:none;border:1px solid rgba(0,255,65,0.2);border-radius:2px;padding:8px 18px;transition:all 0.2s;text-transform:uppercase;}
+.social-link{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-hud);font-size:10px;font-weight:600;
+  letter-spacing:0.15em;color:rgba(0,255,65,0.55);
+  text-decoration:none;border:1px solid rgba(0,255,65,0.2);
+  border-radius:2px;padding:8px 18px;transition:all 0.2s;text-transform:uppercase;
+}
 .social-link:hover{color:var(--green);border-color:rgba(0,255,65,0.5);background:rgba(0,255,65,0.04);box-shadow:0 0 16px rgba(0,255,65,0.08);}
-.social-link.x-link{color:rgba(0,255,65,0.55);border-color:rgba(0,255,65,0.2);}
-.social-link.x-link:hover{color:var(--green);}
-.social-link.tg-link{color:rgba(0,255,65,0.55);border-color:rgba(0,255,65,0.2);}
-.social-link.tg-link:hover{color:var(--green);}
 .social-link.ranks-link{color:rgba(0,255,65,0.7);border-color:rgba(0,255,65,0.3);background:rgba(0,255,65,0.03);}
 .social-link.ranks-link:hover{color:var(--green);border-color:var(--green);background:rgba(0,255,65,0.06);box-shadow:0 0 20px rgba(0,255,65,0.1);}
+/* add grav button in footer */
+.add-grav-btn{
+  display:none;
+  align-items:center;gap:8px;
+  font-family:var(--font-hud);font-size:10px;font-weight:600;
+  letter-spacing:0.15em;color:rgba(255,215,0,0.6);
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:2px;padding:8px 18px;transition:all 0.2s;
+  text-transform:uppercase;background:transparent;cursor:pointer;
+}
+.add-grav-btn.show{display:flex;}
+.add-grav-btn:hover{color:var(--gold);border-color:rgba(255,215,0,0.5);background:rgba(255,215,0,0.04);box-shadow:0 0 16px rgba(255,215,0,0.08);}
 .social-icon{font-size:14px;}
 .flinks{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.1);letter-spacing:0.1em;}
 .flinks a{color:rgba(0,255,65,0.2);text-decoration:none;}
@@ -285,7 +316,7 @@ footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(0,255,65,0.12);border-radius:2px;}
-@media(max-width:600px){.net-pill{display:none;}.hero-title{font-size:clamp(38px,12vw,64px);}}
+@media(max-width:600px){.net-pill{display:none;}.hero-title{font-size:clamp(38px,12vw,64px);}.hdr-bal-amount{font-size:22px;}}
 </style>
 </head>
 <body>
@@ -337,19 +368,10 @@ footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255
 <header>
   <div class="header-left">
     <div class="logo-name">GREEN AVAX</div>
-    <div style="position:relative;">
-      <button class="bal-btn" id="balBtn" onclick="toggleBalPopup()" title="Click to see options">
-        <span class="hdr-bal-label">Balance</span>
-        <span class="hdr-bal-amount" id="gravBalDisplay">—</span>
-        <span class="hdr-bal-unit">$GRAV</span>
-      </button>
-      <div class="bal-popup" id="balPopup">
-        <div class="bp-amount" id="popupBalAmount">—</div>
-        <div class="bp-unit">$GRAV · AVALANCHE C-CHAIN</div>
-        <div class="bp-scan"></div>
-        <button class="bp-add-btn" onclick="addTokenToWallet()">⬡ &nbsp;ADD $GRAV TO WALLET</button>
-        <div class="bp-note">// one click · adds token to MetaMask / Core</div>
-      </div>
+    <div class="hdr-bal-row">
+      <span class="hdr-bal-label">Balance</span>
+      <span class="hdr-bal-amount" id="gravBalDisplay">—</span>
+      <span class="hdr-bal-unit">$GRAV</span>
     </div>
   </div>
   <div class="header-right">
@@ -527,9 +549,10 @@ footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255
 <footer>
   <div class="flogo">GREEN AVAX</div>
   <div class="social-links">
-    <a href="https://x.com/greenavax" target="_blank" class="social-link x-link"><span class="social-icon">𝕏</span><span>@greenavax</span></a>
-    <a href="https://t.me/greenavax" target="_blank" class="social-link tg-link"><span class="social-icon">✈</span><span>t.me/greenavax</span></a>
+    <a href="https://x.com/greenavax" target="_blank" class="social-link"><span class="social-icon">𝕏</span><span>@greenavax</span></a>
+    <a href="https://t.me/greenavax" target="_blank" class="social-link"><span class="social-icon">✈</span><span>t.me/greenavax</span></a>
     <a href="https://greenavax.xyz" target="_blank" class="social-link ranks-link"><span class="social-icon">⬡</span><span>CLAIM RANKS</span></a>
+    <button class="add-grav-btn" id="addGravBtn" onclick="addTokenToWallet()"><span class="social-icon">✦</span><span>ADD $GRAV TO WALLET</span></button>
   </div>
   <div class="flinks"><a href="https://snowtrace.io" target="_blank">SNOWTRACE</a> &nbsp;·&nbsp; AVALANCHE C-CHAIN &nbsp;·&nbsp; IMMUTABLE CONTRACTS</div>
 </footer>
@@ -537,7 +560,6 @@ footer{text-align:center;padding:2.5rem 0 1.5rem;border-top:1px solid rgba(0,255
 </div><!-- /wrap -->
 
 <script>
-// ── CONFIG ─────────────────────────────────────────────────────────
 const CFG={
   b:{addr:"0xbe71B1A5C9Ce53CbDa369951AF28430Aa61d42e3",trig:"0.001",iv:10,label:"BRONZE",col:"var(--bronze2)",emblem:"⬡",bonus:"5 GRAV",tierIdx:0},
   s:{addr:"0x65EF99B8b5bBd2C4877fbAD4674e6945cF1de71E",trig:"0.01", iv:10,label:"SILVER",col:"var(--silver2)",emblem:"◈",bonus:"20 GRAV",tierIdx:1},
@@ -547,7 +569,6 @@ const VAULT_ADDR="0x305A1f6cDa662fAC0c68958D3836597FBDDD61B9";
 const GRAV_TOKEN="0xBB370Fdb0c0B9c717ECAbC5949d461F97F64979f";
 const GRAV_DECIMALS=18;
 const CHAIN=43114;
-
 const MINING_ABI=["function totalClaims() view returns (uint256)","function currentPool() view returns (uint256)","function claimsUntilMega() view returns (uint256)","function gravBalance() view returns (uint256)","function previewNextClaim() view returns (uint256,uint256,uint256,bool)"];
 const VAULT_ABI=["function claimBonus(uint8 tier) external","function checkClaimable(uint8 tier) view returns (bool claimable, uint256 round, uint256 bonus)","function roundClaimed(uint8,uint256) view returns (bool)","function vaultBalance() view returns (uint256)"];
 const ERC20_ABI=["function balanceOf(address) view returns (uint256)"];
@@ -559,58 +580,32 @@ const logs={b:[],s:[],g:[]};
 const rhLogs=[];
 let megaPopupTier=null;
 
-// ── WALLET MODAL ───────────────────────────────────────────────────
+// WALLET MODAL
 function openWalletModal(){if(userAddr)return;document.getElementById('walletModal').classList.add('active');}
 function closeWalletModal(){document.getElementById('walletModal').classList.remove('active');}
 document.getElementById('walletModal').addEventListener('click',function(e){if(e.target===this)closeWalletModal();});
 function openInMetaMaskApp(){window.location.href='https://metamask.app.link/dapp/mine.greenavax.xyz';}
 async function connectWith(t){closeWalletModal();if(!window.ethereum){showToast('No wallet found. Install MetaMask or Core Wallet.','err');return;}await connectWallet();}
 
-// ── GRAV BALANCE ────────────────────────────────────────────────────
+// GRAV BALANCE
 async function refreshGravBalance(){
   if(!gravCtr||!userAddr)return;
   try{
     const bal=await gravCtr.balanceOf(userAddr);
     const n=Number(ethers.formatEther(bal));
-    const fmt=n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-    document.getElementById('gravBalDisplay').textContent=fmt;
-    document.getElementById('popupBalAmount').textContent=fmt;
+    document.getElementById('gravBalDisplay').textContent=n.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
   }catch(e){console.warn('grav bal',e);}
 }
-
-function toggleBalPopup(){
-  const p=document.getElementById('balPopup');
-  p.classList.toggle('show');
-}
-
-// close popup when clicking outside
-document.addEventListener('click',function(e){
-  const popup=document.getElementById('balPopup');
-  const btn=document.getElementById('balBtn');
-  if(popup&&btn&&!btn.contains(e.target)&&!popup.contains(e.target)){
-    popup.classList.remove('show');
-  }
-});
 
 async function addTokenToWallet(){
   if(!window.ethereum)return;
   try{
-    await window.ethereum.request({
-      method:'wallet_watchAsset',
-      params:{
-        type:'ERC20',
-        options:{
-          address:GRAV_TOKEN,
-          symbol:'GRAV',
-          decimals:GRAV_DECIMALS
-        }
-      }
-    });
+    await window.ethereum.request({method:'wallet_watchAsset',params:{type:'ERC20',options:{address:GRAV_TOKEN,symbol:'GRAV',decimals:GRAV_DECIMALS}}});
     showToast('$GRAV added to your wallet!','ok');
   }catch(e){showToast('Could not add token.','err');}
 }
 
-// ── CONNECT ────────────────────────────────────────────────────────
+// CONNECT
 async function connectWallet(){
   if(!window.ethereum)return;
   try{
@@ -624,7 +619,6 @@ async function connectWallet(){
     }
     signer=await provider.getSigner();
     userAddr=await signer.getAddress();
-
     for(const k of['b','s','g'])ctrs[k]=new ethers.Contract(CFG[k].addr,MINING_ABI,signer);
     vaultCtr=new ethers.Contract(VAULT_ADDR,VAULT_ABI,signer);
     gravCtr=new ethers.Contract(GRAV_TOKEN,ERC20_ABI,signer);
@@ -632,8 +626,7 @@ async function connectWallet(){
     document.getElementById('hdrBtn').textContent=short(userAddr);
     document.getElementById('hdrBtn').classList.add('live');
     document.getElementById('heroConnectWrap').style.display='none';
-
-    /* balance popup ready */
+    document.getElementById('addGravBtn').classList.add('show');
 
     for(const id of['rb-btn','rs-btn','rg-btn'])document.getElementById(id).disabled=false;
     for(const k of['b','s','g'])document.getElementById(k+'-btn').disabled=false;
@@ -645,7 +638,7 @@ async function connectWallet(){
   }catch(e){console.error(e);}
 }
 
-// ── PARTICLES ──────────────────────────────────────────────────────
+// PARTICLES
 (()=>{
   const cv=document.getElementById('pts'),cx=cv.getContext('2d');
   let W,H;const rsz=()=>{W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;};
@@ -654,7 +647,7 @@ async function connectWallet(){
   const draw=()=>{cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x=(p.x+p.vx+W)%W;p.y=(p.y+p.vy+H)%H;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(0,255,65,${p.a*.32})`;cx.fill();});requestAnimationFrame(draw);};draw();
 })();
 
-// ── BURST ──────────────────────────────────────────────────────────
+// BURST
 function runBurst(color){
   const cv=document.getElementById('megaBurst'),cx=cv.getContext('2d');
   cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;
@@ -664,7 +657,7 @@ function runBurst(color){
   const draw=()=>{cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;p.vx*=0.98;p.vy*=0.98;if(p.life>0){cx.beginPath();cx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);cx.fillStyle=`${color}${Math.floor(p.life*255).toString(16).padStart(2,'0')}`;cx.fill();}});frame++;if(frame<120)requestAnimationFrame(draw);else cx.clearRect(0,0,W,H);};draw();
 }
 
-// ── UTILS ──────────────────────────────────────────────────────────
+// UTILS
 const fmt=w=>{if(w==null)return'—';const n=Number(ethers.formatEther(w));return n<.01?n.toFixed(4):n.toFixed(2);};
 const short=a=>a.slice(0,6)+'…'+a.slice(-4);
 const setSt=(p,m,t)=>{const e=document.getElementById(p+'-st');e.textContent=m;e.className='status on '+t;};
@@ -684,7 +677,7 @@ function buildDots(p,filled,total){
   for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i<filled?' dot-f':'')+(i===filled?' dot-next':'');c.appendChild(d);}
 }
 
-// ── MEGA POPUP ─────────────────────────────────────────────────────
+// MEGA POPUP
 function showMegaPopup(tierKey,roundNum){
   const c=CFG[tierKey];megaPopupTier=tierKey;
   const modal=document.getElementById('megaModal');
@@ -719,7 +712,7 @@ async function claimMegaBonus(){
   }catch(e){const m=e?.reason||e?.message||'Transaction failed';st.textContent=m.slice(0,80);st.className='mega-status on err';btn.disabled=false;btn.textContent='⚡ CLAIM BONUS';}
 }
 
-// ── REWARDS HUB ────────────────────────────────────────────────────
+// REWARDS HUB
 async function refreshRewards(){
   if(!vaultCtr)return;
   const map={0:'rb',1:'rs',2:'rg'},tierKeys=['b','s','g'];
@@ -753,7 +746,7 @@ function renderRhList(){
   el.innerHTML=rhLogs.map(h=>`<div class="rh-item"><span style="color:${h.col};font-size:14px;">${h.emblem}</span><span style="color:rgba(255,255,255,0.3);font-family:var(--font-mono);font-size:10px;">${h.tier} MEGA FOUND</span><span style="color:${h.col};font-family:var(--font-hud);font-size:11px;font-weight:700;">+${h.bonus}</span></div>`).join('');
 }
 
-// ── MINING REFRESH ─────────────────────────────────────────────────
+// MINING REFRESH
 async function refresh(p){
   if(!ctrs[p])return;
   try{
@@ -776,7 +769,7 @@ async function refresh(p){
 }
 async function refreshAll(){for(const k of['b','s','g'])await refresh(k);await refreshRewards();}
 
-// ── CLAIM ──────────────────────────────────────────────────────────
+// CLAIM
 async function claim(p){
   if(!signer)return;
   const btn=document.getElementById(p+'-btn');
@@ -802,7 +795,7 @@ async function claim(p){
   }finally{btn.disabled=false;await refresh(p);}
 }
 
-// ── INIT ───────────────────────────────────────────────────────────
+// INIT
 window.addEventListener('load',async()=>{
   if(window.ethereum){const a=await window.ethereum.request({method:'eth_accounts'});if(a.length)connectWallet();}
 });
