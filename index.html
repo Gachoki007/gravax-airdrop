@@ -79,6 +79,13 @@
     padding: 28px 48px;
     max-width: 1280px;
     margin: 0 auto;
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    nav { padding: 20px 16px; }
+    .brand { font-size: 0; gap: 0; }
+    .brand-mark { font-size: 18px; }
   }
 
   .brand {
@@ -469,26 +476,7 @@
   .status-msg.error { border-color: rgba(242,168,199,0.4); color: var(--pink); }
   .status-msg.success { border-color: rgba(94,255,163,0.4); color: var(--leaf); }
 
-  /* My Trees section */
-  .my-trees {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 48px 60px;
-    display: none;
-  }
-
-  .my-trees.show { display: block; }
-
-  .my-trees-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 14px;
-    margin-top: 20px;
-  }
-
-  @media (max-width: 1100px) { .my-trees-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 600px) { .my-trees-grid { grid-template-columns: repeat(2, 1fr); } }
-
+  /* My Trees panel card styles (used inside trees-panel-grid) */
   .my-tree-card {
     border-radius: 14px;
     background: rgba(255,255,255,0.03);
@@ -524,10 +512,236 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Nav layout update — My Trees button on left */
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .my-trees-nav-btn {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text-mid);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 9px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    backdrop-filter: blur(8px);
+  }
+
+  .my-trees-nav-btn:hover {
+    border-color: rgba(94,255,163,0.4);
+    color: var(--leaf);
+  }
+
+  .my-trees-nav-btn .count-pill {
+    background: var(--leaf);
+    color: var(--bg-deep);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+    min-width: 16px;
+    text-align: center;
+    display: none;
+  }
+
+  .my-trees-nav-btn .count-pill.show { display: inline-block; }
+
+  /* ---------- Modal overlay (wallet picker) ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 8, 5, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: linear-gradient(165deg, rgba(20,40,30,0.95), rgba(8,18,12,0.98));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 380px;
+    padding: 28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: modalPop 0.2s ease;
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+
+  .modal-head h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-hi);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-low);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  .modal-close:hover { color: var(--text-hi); }
+
+  .wallet-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    text-align: left;
+  }
+
+  .wallet-option:hover {
+    border-color: rgba(94,255,163,0.4);
+    background: rgba(94,255,163,0.06);
+  }
+
+  .wallet-option:last-child { margin-bottom: 0; }
+
+  .wallet-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+  }
+
+  .wallet-icon.mm { background: linear-gradient(140deg, #F6851B, #E2761B); }
+  .wallet-icon.core { background: linear-gradient(140deg, #E84142, #B7282A); }
+  .wallet-icon.mm-mobile { background: linear-gradient(140deg, #F6851B, #C9690E); }
+
+  .wallet-info { flex: 1; }
+
+  .wallet-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-hi);
+  }
+
+  .wallet-desc {
+    font-size: 11.5px;
+    color: var(--text-low);
+    margin-top: 2px;
+  }
+
+  .wallet-arrow {
+    color: var(--text-low);
+    font-size: 16px;
+  }
+
+  /* ---------- My Trees slide-in panel ---------- */
+  .trees-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 8, 5, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 90;
+    display: none;
+  }
+
+  .trees-panel-overlay.show { display: block; }
+
+  .trees-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(420px, 90vw);
+    background: linear-gradient(165deg, rgba(15,30,22,0.97), rgba(6,15,11,0.99));
+    border-right: 1px solid var(--glass-border);
+    z-index: 95;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    padding: 28px 24px;
+  }
+
+  .trees-panel.show { transform: translateX(0); }
+
+  .trees-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .trees-panel-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-hi);
+  }
+
+  .trees-panel-close {
+    background: none;
+    border: none;
+    color: var(--text-low);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .trees-panel-close:hover { color: var(--text-hi); }
+
+  .trees-panel-sub {
+    font-size: 13px;
+    color: var(--text-low);
+    margin-bottom: 24px;
+  }
+
+  .trees-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .eyebrow .dot { animation: none; }
     .card, .buy-btn, .connect-btn { transition: none; }
     .loading-spin { animation: none; }
+    .modal-box { animation: none; }
+    .trees-panel { transition: none; }
   }
 </style>
 </head>
@@ -538,9 +752,15 @@
 
 <main>
   <nav>
-    <div class="brand">
-      <div class="brand-mark">🌿</div>
-      Green AVAX
+    <div class="nav-left">
+      <div class="brand">
+        <div class="brand-mark">🌿</div>
+        Green AVAX
+      </div>
+      <button class="my-trees-nav-btn" id="myTreesNavBtn">
+        🌳 My Trees
+        <span class="count-pill" id="myTreesCountPill">0</span>
+      </button>
     </div>
     <button class="connect-btn" id="connectBtn">Connect Wallet</button>
   </nav>
@@ -560,14 +780,6 @@
   <div class="status-banner">
     <div class="status-msg" id="statusMsg"></div>
   </div>
-
-  <section class="my-trees" id="myTreesSection">
-    <div class="section-head">
-      <h2>My Trees</h2>
-      <p id="myTreesCount"></p>
-    </div>
-    <div class="my-trees-grid" id="myTreesGrid"></div>
-  </section>
 
   <section class="collection">
     <div class="section-head">
@@ -738,6 +950,55 @@
   </footer>
 </main>
 
+<!-- Wallet selection modal -->
+<div class="modal-overlay" id="walletModalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Connect a wallet</h3>
+      <button class="modal-close" id="walletModalClose">&times;</button>
+    </div>
+
+    <div class="wallet-option" id="optMetaMask">
+      <div class="wallet-icon mm">🦊</div>
+      <div class="wallet-info">
+        <div class="wallet-name">MetaMask</div>
+        <div class="wallet-desc">Browser extension</div>
+      </div>
+      <div class="wallet-arrow">→</div>
+    </div>
+
+    <div class="wallet-option" id="optCore">
+      <div class="wallet-icon core">🔺</div>
+      <div class="wallet-info">
+        <div class="wallet-name">Core Wallet</div>
+        <div class="wallet-desc">Avalanche's native wallet</div>
+      </div>
+      <div class="wallet-arrow">→</div>
+    </div>
+
+    <div class="wallet-option" id="optMetaMaskMobile">
+      <div class="wallet-icon mm-mobile">📱</div>
+      <div class="wallet-info">
+        <div class="wallet-name">MetaMask Mobile</div>
+        <div class="wallet-desc">Opens this site inside the MetaMask app</div>
+      </div>
+      <div class="wallet-arrow">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- My Trees slide-in panel -->
+<div class="trees-panel-overlay" id="treesPanelOverlay"></div>
+<div class="trees-panel" id="treesPanel">
+  <div class="trees-panel-head">
+    <h2>My Trees</h2>
+    <button class="trees-panel-close" id="treesPanelClose">&times;</button>
+  </div>
+  <p class="trees-panel-sub" id="myTreesCount">Connect your wallet to view your trees.</p>
+  <div class="trees-panel-grid" id="myTreesGrid"></div>
+</div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.1/ethers.umd.min.js"></script>
 <script>
   // ---------- Config ----------
@@ -781,21 +1042,106 @@
     statusEl.className = "status-msg";
   }
 
-  // ---------- Wallet connect ----------
-  async function connectWallet() {
+  // ---------- Wallet modal ----------
+  const walletModalOverlay = document.getElementById("walletModalOverlay");
+  const walletModalClose = document.getElementById("walletModalClose");
+
+  function openWalletModal() {
+    walletModalOverlay.classList.add("show");
+  }
+
+  function closeWalletModal() {
+    walletModalOverlay.classList.remove("show");
+  }
+
+  connectBtn.addEventListener("click", () => {
+    // If already connected, clicking again does nothing destructive — just reopen picker
+    openWalletModal();
+  });
+
+  walletModalClose.addEventListener("click", closeWalletModal);
+  walletModalOverlay.addEventListener("click", (e) => {
+    if (e.target === walletModalOverlay) closeWalletModal();
+  });
+
+  function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  // Finds a specific injected provider among possibly multiple (MetaMask + Core both inject window.ethereum,
+  // and may populate window.ethereum.providers[] when more than one extension is active).
+  function getInjectedProvider(preferredFlag) {
+    if (typeof window.ethereum === "undefined") return null;
+
+    if (Array.isArray(window.ethereum.providers)) {
+      const match = window.ethereum.providers.find(p => p[preferredFlag]);
+      if (match) return match;
+    }
+
+    if (window.ethereum[preferredFlag]) return window.ethereum;
+
+    // Fallback: only one wallet installed, assume it's the one the user picked
+    return window.ethereum;
+  }
+
+  document.getElementById("optMetaMask").addEventListener("click", async () => {
+    if (isMobileDevice() && typeof window.ethereum === "undefined") {
+      // No injected provider on mobile browser — deep link into MetaMask app instead
+      launchMetaMaskMobile();
+      return;
+    }
     if (typeof window.ethereum === "undefined") {
-      showStatus("No wallet found. Please install MetaMask or another Avalanche-compatible wallet.", "error");
+      showStatus('No wallet extension detected. Install MetaMask from <a href="https://metamask.io/download" target="_blank" style="color:var(--leaf)">metamask.io</a>.', "error");
+      closeWalletModal();
+      return;
+    }
+    const injected = getInjectedProvider("isMetaMask");
+    closeWalletModal();
+    await connectWallet(injected);
+  });
+
+  document.getElementById("optCore").addEventListener("click", async () => {
+    if (typeof window.ethereum === "undefined" || !(window.ethereum.isAvalanche || (Array.isArray(window.ethereum.providers) && window.ethereum.providers.some(p => p.isAvalanche)))) {
+      showStatus('Core Wallet not detected. Install it from <a href="https://core.app" target="_blank" style="color:var(--leaf)">core.app</a>.', "error");
+      closeWalletModal();
+      return;
+    }
+    const injected = getInjectedProvider("isAvalanche");
+    closeWalletModal();
+    await connectWallet(injected);
+  });
+
+  document.getElementById("optMetaMaskMobile").addEventListener("click", () => {
+    closeWalletModal();
+    launchMetaMaskMobile();
+  });
+
+  function launchMetaMaskMobile() {
+    // MetaMask's deep link format opens the current page inside the MetaMask in-app browser,
+    // where window.ethereum becomes available.
+    const currentUrl = window.location.href.replace(/^https?:\/\//, "");
+    const deepLink = "https://metamask.app.link/dapp/" + currentUrl;
+    showStatus("Opening MetaMask app...", "");
+    window.location.href = deepLink;
+  }
+
+  // ---------- Wallet connect ----------
+  async function connectWallet(injectedProvider) {
+    const ethProvider = injectedProvider || window.ethereum;
+
+    if (!ethProvider) {
+      showStatus("No wallet found. Please install MetaMask or Core Wallet.", "error");
       return;
     }
 
     try {
-      provider = new ethers.BrowserProvider(window.ethereum);
+      provider = new ethers.BrowserProvider(ethProvider);
 
       // Ensure we're on Avalanche C-Chain
       const network = await provider.getNetwork();
       if (network.chainId !== 43114n) {
         try {
-          await window.ethereum.request({
+          await ethProvider.request({
             method: "wallet_switchEthereumChain",
             params: [{ chainId: AVALANCHE_CHAIN_ID }]
           });
@@ -803,7 +1149,7 @@
           showStatus("Please switch your wallet to Avalanche C-Chain to continue.", "error");
           return;
         }
-        provider = new ethers.BrowserProvider(window.ethereum);
+        provider = new ethers.BrowserProvider(ethProvider);
       }
 
       await provider.send("eth_requestAccounts", []);
@@ -831,8 +1177,6 @@
       showStatus("Wallet connection failed. Please try again.", "error");
     }
   }
-
-  connectBtn.addEventListener("click", connectWallet);
 
   // ---------- Load live species prices + remaining supply ----------
   async function loadSpeciesPricesAndRemaining() {
@@ -957,7 +1301,7 @@
         showStatus('<span class="loading-spin"></span> Waiting for mint to confirm on-chain...');
         await mintTx.wait();
 
-        showStatus(`Minted ${qty} tree${qty > 1 ? "s" : ""} successfully! Check "My Trees" below.`, "success");
+        showStatus(`Minted ${qty} tree${qty > 1 ? "s" : ""} successfully! Open "My Trees" in the top left to view.`, "success");
 
         await loadSpeciesPricesAndRemaining();
         await loadMyTrees();
@@ -973,21 +1317,50 @@
     });
   });
 
-  // ---------- My Trees ----------
+  // ---------- My Trees nav button + slide-in panel ----------
+  const treesPanel = document.getElementById("treesPanel");
+  const treesPanelOverlay = document.getElementById("treesPanelOverlay");
+  const myTreesNavBtn = document.getElementById("myTreesNavBtn");
+  const treesPanelClose = document.getElementById("treesPanelClose");
+  const myTreesCountPill = document.getElementById("myTreesCountPill");
+
+  function openTreesPanel() {
+    treesPanel.classList.add("show");
+    treesPanelOverlay.classList.add("show");
+    if (userAddress) loadMyTrees();
+  }
+
+  function closeTreesPanel() {
+    treesPanel.classList.remove("show");
+    treesPanelOverlay.classList.remove("show");
+  }
+
+  myTreesNavBtn.addEventListener("click", () => {
+    if (!userAddress) {
+      openWalletModal();
+      return;
+    }
+    openTreesPanel();
+  });
+
+  treesPanelClose.addEventListener("click", closeTreesPanel);
+  treesPanelOverlay.addEventListener("click", closeTreesPanel);
+
   async function loadMyTrees() {
-    const section = document.getElementById("myTreesSection");
     const grid = document.getElementById("myTreesGrid");
     const countEl = document.getElementById("myTreesCount");
 
-    section.classList.add("show");
     grid.innerHTML = '<div class="empty-trees"><span class="loading-spin"></span> Loading your trees...</div>';
 
     try {
       const tokenIds = await nftContract.tokensOfOwner(userAddress);
 
+      myTreesCountPill.textContent = tokenIds.length;
+      myTreesCountPill.classList.toggle("show", tokenIds.length > 0);
+
       if (tokenIds.length === 0) {
-        grid.innerHTML = '<div class="empty-trees">You don\'t own any trees yet — mint one above to get started.</div>';
-        countEl.textContent = "";
+        grid.innerHTML = '<div class="empty-trees">You don\'t own any trees yet — mint one to get started.</div>';
+        countEl.textContent = "No trees yet";
         return;
       }
 
