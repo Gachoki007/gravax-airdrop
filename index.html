@@ -1,1401 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Green AVAX NFTs — Own Digital Trees</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GREEN AVAX — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #060f0b;
-    --bg-deep: #030805;
-    --glass: rgba(94, 255, 163, 0.05);
-    --glass-border: rgba(94, 255, 163, 0.18);
-    --leaf: #5EFFA3;
-    --leaf-dim: #2F8F5E;
-    --jade: #1F4D3A;
-    --gold: #FFD86B;
-    --ice-blue: #7FD9D4;
-    --pink: #F2A8C7;
-    --text-hi: #EAFBF1;
-    --text-mid: #9FC9AE;
-    --text-low: #5A7D68;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text-hi);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    position: relative;
-    min-height: 100vh;
-  }
-
-  /* Ambient background mesh */
-  .mesh {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(ellipse 700px 500px at 15% 10%, rgba(94,255,163,0.16), transparent 60%),
-      radial-gradient(ellipse 600px 600px at 85% 25%, rgba(127,217,212,0.12), transparent 60%),
-      radial-gradient(ellipse 800px 600px at 50% 90%, rgba(31,77,58,0.35), transparent 65%),
-      var(--bg);
-  }
-
-  .mesh::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 900px 700px at 50% 20%, black, transparent 70%);
-  }
-
-  .grain {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  main { position: relative; z-index: 2; }
-
-  /* Nav */
-  nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 28px 48px;
-    max-width: 1280px;
-    margin: 0 auto;
-    gap: 12px;
-  }
-
-  @media (max-width: 480px) {
-    nav { padding: 20px 16px; }
-    .brand { font-size: 0; gap: 0; }
-    .brand-mark { font-size: 18px; }
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 18px;
-    letter-spacing: -0.01em;
-  }
-
-  .brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    background: linear-gradient(140deg, var(--leaf), var(--jade));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 0 18px rgba(94,255,163,0.35);
-  }
-
-  .connect-btn {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    color: var(--bg-deep);
-    background: var(--leaf);
-    border: none;
-    padding: 11px 22px;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 0 0 rgba(94,255,163,0);
-  }
-
-  .connect-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(94,255,163,0.35);
-  }
-
-  .connect-btn:active { transform: translateY(0); }
-
-  /* Hero */
-  .hero {
-    text-align: center;
-    padding: 80px 24px 60px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--leaf);
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 7px 16px;
-    border-radius: 100px;
-    margin-bottom: 28px;
-    backdrop-filter: blur(8px);
-  }
-
-  .eyebrow .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--leaf);
-    box-shadow: 0 0 8px var(--leaf);
-    animation: pulse 2s infinite ease-in-out;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  h1 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: clamp(40px, 7vw, 76px);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
-    background: linear-gradient(160deg, #ffffff 10%, var(--leaf) 60%, var(--ice-blue) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 22px;
-  }
-
-  .subhead {
-    font-size: clamp(16px, 2.2vw, 20px);
-    color: var(--text-mid);
-    font-weight: 400;
-    line-height: 1.5;
-  }
-
-  .subhead strong {
-    color: var(--text-hi);
-    font-weight: 500;
-  }
-
-  .hero-stats {
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-    margin-top: 48px;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .stat .num {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--leaf);
-  }
-
-  .stat .lab {
-    font-size: 12px;
-    color: var(--text-low);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 4px;
-  }
-
-  /* Collection section */
-  .collection {
-    max-width: 1280px;
-    margin: 40px auto 0;
-    padding: 40px 48px 120px;
-  }
-
-  .section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .section-head h2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text-hi);
-  }
-
-  .section-head p {
-    font-size: 14px;
-    color: var(--text-low);
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 22px;
-  }
-
-  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-
-  .card {
-    position: relative;
-    border-radius: 20px;
-    background: linear-gradient(165deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(14px);
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(94,255,163,0.4);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(94,255,163,0.08);
-  }
-
-  .card-art {
-    aspect-ratio: 1;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-art svg { display: block; width: 100%; height: 100%; }
-
-  .rarity-tag {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 5px 10px;
-    border-radius: 100px;
-    backdrop-filter: blur(6px);
-    z-index: 2;
-  }
-
-  .tag-common { background: rgba(94,255,163,0.18); color: #B6FFD6; border: 1px solid rgba(94,255,163,0.3); }
-  .tag-uncommon { background: rgba(127,217,212,0.18); color: #C9F4F1; border: 1px solid rgba(127,217,212,0.3); }
-  .tag-rare { background: rgba(242,168,199,0.18); color: #FBDCE9; border: 1px solid rgba(242,168,199,0.3); }
-  .tag-legendary { background: rgba(255,216,107,0.2); color: #FFEAB3; border: 1px solid rgba(255,216,107,0.4); }
-
-  .card-body {
-    padding: 16px 18px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-  }
-
-  .card-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-hi);
-  }
-
-  .card-traits {
-    font-size: 12px;
-    color: var(--text-low);
-    margin-top: -8px;
-  }
-
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    gap: 10px;
-  }
-
-  .price-tag {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .price-tag .lab {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-low);
-  }
-
-  .price-tag .val {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--leaf);
-  }
-
-  .buy-btn {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    color: var(--bg-deep);
-    background: var(--leaf);
-    border: none;
-    padding: 10px 18px;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    white-space: nowrap;
-  }
-
-  .buy-btn:hover {
-    box-shadow: 0 0 22px rgba(94,255,163,0.45);
-    transform: translateY(-1px);
-  }
-
-  .card.legendary .buy-btn {
-    background: var(--gold);
-    box-shadow: 0 0 0 rgba(255,216,107,0);
-  }
-
-  .card.legendary .buy-btn:hover {
-    box-shadow: 0 0 22px rgba(255,216,107,0.5);
-  }
-
-  .card.legendary .price-tag .val { color: var(--gold); }
-
-  /* Footer */
-  footer {
-    text-align: center;
-    padding: 36px 24px 48px;
-    color: var(--text-low);
-    font-size: 12px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-
-  footer a { color: var(--text-mid); text-decoration: none; }
-  footer a:hover { color: var(--leaf); }
-
-  /* Quantity selector */
-  .qty-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: 100px;
-    padding: 4px;
-    width: fit-content;
-  }
-
-  .qty-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255,255,255,0.06);
-    color: var(--text-hi);
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    transition: background 0.15s ease;
-  }
-
-  .qty-btn:hover { background: rgba(94,255,163,0.2); }
-
-  .qty-val {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    min-width: 22px;
-    text-align: center;
-  }
-
-  .card-footer-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .total-cost {
-    font-size: 11px;
-    color: var(--text-low);
-  }
-
-  .total-cost span { color: var(--leaf); font-weight: 600; }
-
-  .buy-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none !important;
-    transform: none !important;
-  }
-
-  /* Status banner */
-  .status-banner {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 48px;
-  }
-
-  .status-msg {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 12px 18px;
-    font-size: 13px;
-    color: var(--text-mid);
-    margin-bottom: 24px;
-    backdrop-filter: blur(8px);
-  }
-
-  .status-msg.show { display: flex; }
-  .status-msg.error { border-color: rgba(242,168,199,0.4); color: var(--pink); }
-  .status-msg.success { border-color: rgba(94,255,163,0.4); color: var(--leaf); }
-
-  /* My Trees panel card styles (used inside trees-panel-grid) */
-  .my-tree-card {
-    border-radius: 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--glass-border);
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-  }
-
-  .my-tree-card svg { display: block; width: 100%; aspect-ratio: 1; }
-
-  .my-tree-label {
-    padding: 8px 10px;
-    font-size: 11px;
-    color: var(--text-mid);
-  }
-
-  .my-tree-label .id { color: var(--leaf); font-weight: 600; }
-
-  .empty-trees {
-    color: var(--text-low);
-    font-size: 13px;
-    padding: 20px 0;
-  }
-
-  .loading-spin {
-    width: 14px;
-    height: 14px;
-    border: 2px solid var(--glass-border);
-    border-top-color: var(--leaf);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Nav layout update — My Trees button on left */
-  .nav-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-
-  .my-trees-nav-btn {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    color: var(--text-mid);
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 9px 16px;
-    border-radius: 100px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    transition: border-color 0.15s ease, color 0.15s ease;
-    backdrop-filter: blur(8px);
-  }
-
-  .my-trees-nav-btn:hover {
-    border-color: rgba(94,255,163,0.4);
-    color: var(--leaf);
-  }
-
-  .my-trees-nav-btn .count-pill {
-    background: var(--leaf);
-    color: var(--bg-deep);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 100px;
-    min-width: 16px;
-    text-align: center;
-    display: none;
-  }
-
-  .my-trees-nav-btn .count-pill.show { display: inline-block; }
-
-  /* ---------- Modal overlay (wallet picker) ---------- */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(3, 8, 5, 0.7);
-    backdrop-filter: blur(6px);
-    z-index: 100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .modal-overlay.show { display: flex; }
-
-  .modal-box {
-    background: linear-gradient(165deg, rgba(20,40,30,0.95), rgba(8,18,12,0.98));
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 380px;
-    padding: 28px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-    animation: modalPop 0.2s ease;
-  }
-
-  @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.96) translateY(8px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  .modal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-  }
-
-  .modal-head h3 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--text-hi);
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--text-low);
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-  }
-
-  .modal-close:hover { color: var(--text-hi); }
-
-  .wallet-option {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-    text-align: left;
-  }
-
-  .wallet-option:hover {
-    border-color: rgba(94,255,163,0.4);
-    background: rgba(94,255,163,0.06);
-  }
-
-  .wallet-option:last-child { margin-bottom: 0; }
-
-  .wallet-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 19px;
-    flex-shrink: 0;
-  }
-
-  .wallet-icon.mm { background: linear-gradient(140deg, #F6851B, #E2761B); }
-  .wallet-icon.core { background: linear-gradient(140deg, #E84142, #B7282A); }
-  .wallet-icon.mm-mobile { background: linear-gradient(140deg, #F6851B, #C9690E); }
-
-  .wallet-info { flex: 1; }
-
-  .wallet-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-hi);
-  }
-
-  .wallet-desc {
-    font-size: 11.5px;
-    color: var(--text-low);
-    margin-top: 2px;
-  }
-
-  .wallet-arrow {
-    color: var(--text-low);
-    font-size: 16px;
-  }
-
-  /* ---------- My Trees slide-in panel ---------- */
-  .trees-panel-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(3, 8, 5, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 90;
-    display: none;
-  }
-
-  .trees-panel-overlay.show { display: block; }
-
-  .trees-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(420px, 90vw);
-    background: linear-gradient(165deg, rgba(15,30,22,0.97), rgba(6,15,11,0.99));
-    border-right: 1px solid var(--glass-border);
-    z-index: 95;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-    padding: 28px 24px;
-  }
-
-  .trees-panel.show { transform: translateX(0); }
-
-  .trees-panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-
-  .trees-panel-head h2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-hi);
-  }
-
-  .trees-panel-close {
-    background: none;
-    border: none;
-    color: var(--text-low);
-    font-size: 22px;
-    cursor: pointer;
-    padding: 4px;
-    line-height: 1;
-  }
-
-  .trees-panel-close:hover { color: var(--text-hi); }
-
-  .trees-panel-sub {
-    font-size: 13px;
-    color: var(--text-low);
-    margin-bottom: 24px;
-  }
-
-  .trees-panel-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .eyebrow .dot { animation: none; }
-    .card, .buy-btn, .connect-btn { transition: none; }
-    .loading-spin { animation: none; }
-    .modal-box { animation: none; }
-    .trees-panel { transition: none; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dark:#020a02;--green:#00ff41;--green3:#007a1e;
+  --green-glow:rgba(0,255,65,0.25);
+  --bronze:#cd7f32;--bronze2:#e8963c;
+  --silver:#a8a8b8;--silver2:#d4d4e0;
+  --gold:#ffd700;--gold2:#ffe84d;
+  --font-hud:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
+body{background:var(--dark);color:#b0c8b0;font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,255,65,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.04) 1px,transparent 1px);background-size:50px 50px;}
+.wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:3rem 1.5rem 4rem;}
+
+.lock-screen{text-align:center;padding:5rem 1rem;}
+.lock-icon{font-size:48px;margin-bottom:1rem;color:rgba(0,255,65,0.3);}
+.lock-text{font-family:var(--font-mono);font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:2rem;}
+.connect-btn{
+  font-family:var(--font-hud);font-size:12px;font-weight:700;letter-spacing:0.18em;
+  padding:14px 36px;background:transparent;border:1px solid var(--green);
+  color:var(--green);border-radius:3px;cursor:pointer;transition:all 0.25s;
+  text-transform:uppercase;position:relative;overflow:hidden;
+}
+.connect-btn::after{content:'';position:absolute;inset:0;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform 0.25s;z-index:-1;}
+.connect-btn:hover{color:var(--dark);}
+.connect-btn:hover::after{transform:scaleX(1);}
+
+.header{text-align:center;margin-bottom:2.5rem;}
+.h-tag{font-family:var(--font-mono);font-size:10px;color:rgba(0,255,65,0.4);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px;}
+.h-title{font-family:var(--font-hud);font-size:32px;font-weight:900;color:var(--green);letter-spacing:0.1em;text-shadow:0 0 30px var(--green-glow);}
+.h-owner{font-family:var(--font-mono);font-size:11px;color:rgba(0,255,65,0.5);margin-top:10px;letter-spacing:0.05em;}
+
+.denied{
+  text-align:center;padding:3rem 1.5rem;
+  border:1px solid rgba(255,60,60,0.25);border-radius:4px;
+  background:rgba(255,60,60,0.03);
+}
+.denied-icon{font-size:40px;margin-bottom:1rem;}
+.denied-title{font-family:var(--font-hud);font-size:16px;color:rgba(255,80,80,0.8);letter-spacing:0.1em;margin-bottom:8px;}
+.denied-sub{font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.3);}
+
+.panel{border:1px solid rgba(0,255,65,0.15);border-radius:4px;background:linear-gradient(160deg,rgba(0,255,65,0.02),rgba(0,0,0,0.3));overflow:hidden;margin-bottom:1.5rem;}
+.panel-top{height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.panel-inner{padding:1.75rem;}
+
+.tier-rows{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+.tier-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,0.3);border-radius:3px;padding:14px 16px;
+  border-left:3px solid;
+}
+.tier-row.bronze-row{border-color:var(--bronze);}
+.tier-row.silver-row{border-color:var(--silver);}
+.tier-row.gold-row{border-color:var(--gold);}
+.tr-left{display:flex;align-items:center;gap:12px;}
+.tr-emblem{font-size:22px;}
+.tr-name{font-family:var(--font-hud);font-size:13px;font-weight:700;letter-spacing:0.1em;}
+.tr-amount{font-family:var(--font-hud);font-size:18px;font-weight:700;}
+.tr-status{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+.tr-right{text-align:right;}
+
+.total-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:16px 0;border-top:1px solid rgba(0,255,65,0.1);margin-bottom:1.5rem;
+}
+.total-label{font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.15em;text-transform:uppercase;}
+.total-amount{font-family:var(--font-hud);font-size:26px;font-weight:900;color:var(--green);text-shadow:0 0 20px var(--green-glow);}
+
+.sweep-btn{
+  width:100%;padding:18px;border-radius:3px;border:none;
+  font-family:var(--font-hud);font-size:14px;font-weight:700;
+  letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;
+  background:linear-gradient(135deg,#007a1e,var(--green));
+  color:#000;transition:all 0.2s;margin-bottom:8px;
+}
+.sweep-btn:hover:not(:disabled){box-shadow:0 0 30px var(--green-glow);}
+.sweep-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+.refresh-btn{
+  width:100%;padding:10px;background:transparent;border:1px solid rgba(0,255,65,0.15);
+  color:rgba(0,255,65,0.4);font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;
+  text-transform:uppercase;border-radius:2px;cursor:pointer;transition:all 0.2s;
+}
+.refresh-btn:hover{color:var(--green);border-color:rgba(0,255,65,0.4);}
+
+.log-panel{margin-top:1.5rem;}
+.log-title{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:10px;}
+.log-list{display:flex;flex-direction:column;gap:6px;}
+.log-item{
+  font-family:var(--font-mono);font-size:11px;padding:10px 14px;
+  border-radius:2px;display:flex;justify-content:space-between;align-items:center;
+}
+.log-item.pending{background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.15);color:rgba(0,255,65,0.5);}
+.log-item.success{background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.3);color:var(--green);}
+.log-item.skip{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.25);}
+.log-item.error{background:rgba(255,60,60,0.04);border:1px solid rgba(255,60,60,0.2);color:rgba(255,80,80,0.7);}
+
+footer{text-align:center;margin-top:3rem;font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.1);letter-spacing:0.1em;}
 </style>
 </head>
 <body>
+<div class="bg-grid"></div>
+<div class="wrap">
 
-<div class="mesh"></div>
-<div class="grain"></div>
-
-<main>
-  <nav>
-    <div class="nav-left">
-      <div class="brand">
-        <div class="brand-mark">🌿</div>
-        Green AVAX
-      </div>
-      <button class="my-trees-nav-btn" id="myTreesNavBtn">
-        🌳 My Trees
-        <span class="count-pill" id="myTreesCountPill">0</span>
-      </button>
-    </div>
-    <button class="connect-btn" id="connectBtn">Connect Wallet</button>
-  </nav>
-
-  <section class="hero">
-    <div class="eyebrow"><span class="dot"></span> Live on Avalanche C-Chain</div>
-    <h1>GREEN AVAX NFTs</h1>
-    <p class="subhead"><strong>Own digital trees.</strong> Own the future.<br>Each tree lives entirely on-chain — no images, no IPFS, just code and canopy.</p>
-
-    <div class="hero-stats">
-      <div class="stat"><div class="num" id="remainingStat">10,000</div><div class="lab">Trees Remaining</div></div>
-      <div class="stat"><div class="num">4</div><div class="lab">Tree Species</div></div>
-      <div class="stat"><div class="num">$GRAV</div><div class="lab">Mint Currency</div></div>
-    </div>
-  </section>
-
-  <div class="status-banner">
-    <div class="status-msg" id="statusMsg"></div>
+  <div class="header">
+    <div class="h-tag">// private admin panel</div>
+    <div class="h-title">GREEN AVAX</div>
+    <div class="h-owner" id="ownerLine" style="display:none;">Connected as <span id="ownerAddr">—</span></div>
   </div>
 
-  <section class="collection">
-    <div class="section-head">
-      <h2>The Collection</h2>
-      <p>Connect your wallet to mint — payment in $GRAV</p>
-    </div>
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-icon">⬡</div>
+    <div class="lock-text">CONNECT THE OWNER WALLET TO ACCESS THIS PANEL</div>
+    <button class="connect-btn" onclick="connectWallet()">CONNECT WALLET</button>
+  </div>
 
-    <div class="grid">
-
-      <!-- OAK -->
-      <div class="card" data-card-species="0">
-        <div class="card-art">
-          <span class="rarity-tag tag-common">Common</span>
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="200" fill="#3FA9E8"/>
-            <circle cx="165" cy="35" r="16" fill="#FFD86B"/>
-            <rect y="160" width="200" height="40" fill="#4A2F1A"/>
-            <rect y="150" width="200" height="12" fill="#3FA050"/>
-            <rect x="90" y="118" width="20" height="36" fill="#2E1A0D"/>
-            <ellipse cx="100" cy="110" rx="42" ry="30" fill="#1B5E20"/>
-            <ellipse cx="100" cy="88" rx="32" ry="24" fill="#2E7D32"/>
-            <ellipse cx="100" cy="70" rx="22" ry="20" fill="#43A047"/>
-            <ellipse cx="82" cy="64" rx="10" ry="7" fill="#66BB6A" opacity="0.5"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <div class="card-title">Oak Tree</div>
-          <div class="card-traits">Summer · Mature</div>
-          <div class="card-footer-row">
-            <div class="qty-row" data-species="0">
-              <button class="qty-btn qty-minus">−</button>
-              <span class="qty-val">1</span>
-              <button class="qty-btn qty-plus">+</button>
-            </div>
-            <div class="card-footer">
-              <div class="price-tag"><span class="lab">Total</span><span class="val total-display" data-species="0">100 GRAV</span></div>
-              <button class="buy-btn" data-species="0" data-base-price="100">Buy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PINE -->
-      <div class="card" data-card-species="1">
-        <div class="card-art">
-          <span class="rarity-tag tag-uncommon">Uncommon</span>
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="200" fill="#1A237E"/>
-            <circle cx="160" cy="34" r="14" fill="#E0E0E0"/>
-            <circle cx="165" cy="30" r="12" fill="#1A237E"/>
-            <circle cx="25" cy="24" r="1.8" fill="white"/>
-            <circle cx="52" cy="44" r="1.2" fill="white"/>
-            <circle cx="88" cy="18" r="2.2" fill="white"/>
-            <circle cx="118" cy="38" r="1.2" fill="white"/>
-            <circle cx="62" cy="62" r="1.8" fill="white"/>
-            <rect y="160" width="200" height="40" fill="#37474F"/>
-            <rect y="148" width="200" height="16" fill="#CFD8DC"/>
-            <rect x="92" y="132" width="16" height="22" fill="#3D2B1F"/>
-            <polygon points="100,38 60,148 140,148" fill="#1B5E20"/>
-            <polygon points="100,24 66,124 134,124" fill="#2E7D32"/>
-            <polygon points="100,10 72,102 128,102" fill="#43A047"/>
-            <polygon points="100,10 82,54 118,54" fill="white" opacity="0.8"/>
-            <polygon points="100,24 76,88 124,88" fill="white" opacity="0.5"/>
-            <polygon points="100,38 70,110 130,110" fill="white" opacity="0.3"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <div class="card-title">Pine Tree</div>
-          <div class="card-traits">Winter · Ancient</div>
-          <div class="card-footer-row">
-            <div class="qty-row" data-species="1">
-              <button class="qty-btn qty-minus">−</button>
-              <span class="qty-val">1</span>
-              <button class="qty-btn qty-plus">+</button>
-            </div>
-            <div class="card-footer">
-              <div class="price-tag"><span class="lab">Total</span><span class="val total-display" data-species="1">250 GRAV</span></div>
-              <button class="buy-btn" data-species="1" data-base-price="250">Buy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PALM -->
-      <div class="card" data-card-species="2">
-        <div class="card-art">
-          <span class="rarity-tag tag-rare">Rare</span>
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="200" fill="#7FD9D4"/>
-            <circle cx="40" cy="32" r="18" fill="#FFE9A8"/>
-            <ellipse cx="150" cy="30" rx="26" ry="12" fill="white" opacity="0.7"/>
-            <rect y="158" width="200" height="42" fill="#E8C77B"/>
-            <rect y="148" width="200" height="12" fill="#3FA9E8" opacity="0.6"/>
-            <path d="M100 70 C 94 100, 96 130, 100 158 C 104 130, 108 100, 100 70 Z" fill="#7A5230"/>
-            <path d="M100 78 Q 60 50 30 60 Q 65 68 100 86" fill="#2E7D32"/>
-            <path d="M100 78 Q 140 50 170 60 Q 135 68 100 86" fill="#388E3C"/>
-            <path d="M100 74 Q 70 38 44 36 Q 76 56 100 82" fill="#43A047"/>
-            <path d="M100 74 Q 130 38 156 36 Q 124 56 100 82" fill="#2E7D32"/>
-            <path d="M100 70 Q 96 30 78 16 Q 92 46 100 78" fill="#388E3C"/>
-            <path d="M100 70 Q 104 30 122 16 Q 108 46 100 78" fill="#43A047"/>
-            <ellipse cx="92" cy="150" rx="5" ry="6" fill="#5D3A1A"/>
-            <ellipse cx="106" cy="155" rx="5" ry="6" fill="#4A2F15"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <div class="card-title">Palm Tree</div>
-          <div class="card-traits">Tropical · Sapling</div>
-          <div class="card-footer-row">
-            <div class="qty-row" data-species="2">
-              <button class="qty-btn qty-minus">−</button>
-              <span class="qty-val">1</span>
-              <button class="qty-btn qty-plus">+</button>
-            </div>
-            <div class="card-footer">
-              <div class="price-tag"><span class="lab">Total</span><span class="val total-display" data-species="2">500 GRAV</span></div>
-              <button class="buy-btn" data-species="2" data-base-price="500">Buy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ACACIA -->
-      <div class="card legendary" data-card-species="3">
-        <div class="card-art">
-          <span class="rarity-tag tag-legendary">Legendary</span>
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <rect width="200" height="200" fill="#BF360C"/>
-            <rect y="70" width="200" height="100" fill="#E65100" opacity="0.7"/>
-            <rect y="120" width="200" height="60" fill="#FF6F00" opacity="0.5"/>
-            <ellipse cx="100" cy="164" rx="38" ry="14" fill="#FFD600" opacity="0.9"/>
-            <circle cx="24" cy="22" r="2.8" fill="#FFD600"/>
-            <circle cx="56" cy="12" r="2" fill="#FFD600" opacity="0.8"/>
-            <circle cx="144" cy="16" r="2.8" fill="#FFD600"/>
-            <circle cx="174" cy="32" r="2" fill="#FFD600" opacity="0.8"/>
-            <rect y="160" width="200" height="40" fill="#4E342E"/>
-            <path d="M96 160 L104 100 L100 70" stroke="#3E2723" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <path d="M100 100 L70 78" stroke="#3E2723" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <path d="M102 90 L132 70" stroke="#3E2723" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <ellipse cx="100" cy="58" rx="62" ry="14" fill="#2E7D32"/>
-            <ellipse cx="60" cy="62" rx="26" ry="10" fill="#388E3C"/>
-            <ellipse cx="140" cy="64" rx="28" ry="10" fill="#2E7D32"/>
-            <ellipse cx="100" cy="50" rx="40" ry="10" fill="#43A047"/>
-            <ellipse cx="78" cy="52" rx="14" ry="5" fill="#FFD600" opacity="0.25"/>
-          </svg>
-        </div>
-        <div class="card-body">
-          <div class="card-title">Acacia Tree</div>
-          <div class="card-traits">Savanna · Ancient ✦</div>
-          <div class="card-footer-row">
-            <div class="qty-row" data-species="3">
-              <button class="qty-btn qty-minus">−</button>
-              <span class="qty-val">1</span>
-              <button class="qty-btn qty-plus">+</button>
-            </div>
-            <div class="card-footer">
-              <div class="price-tag"><span class="lab">Total</span><span class="val total-display" data-species="3">1000 GRAV</span></div>
-              <button class="buy-btn" data-species="3" data-base-price="1000">Buy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <footer>
-    Green AVAX NFTs · Built on Avalanche C-Chain · Minted with <a href="#" id="contractLink">$GRAV</a>
-  </footer>
-</main>
-
-<!-- Wallet selection modal -->
-<div class="modal-overlay" id="walletModalOverlay">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>Connect a wallet</h3>
-      <button class="modal-close" id="walletModalClose">&times;</button>
-    </div>
-
-    <div class="wallet-option" id="optMetaMask">
-      <div class="wallet-icon mm">🦊</div>
-      <div class="wallet-info">
-        <div class="wallet-name">MetaMask</div>
-        <div class="wallet-desc">Browser extension</div>
-      </div>
-      <div class="wallet-arrow">→</div>
-    </div>
-
-    <div class="wallet-option" id="optCore">
-      <div class="wallet-icon core">🔺</div>
-      <div class="wallet-info">
-        <div class="wallet-name">Core Wallet</div>
-        <div class="wallet-desc">Avalanche's native wallet</div>
-      </div>
-      <div class="wallet-arrow">→</div>
-    </div>
-
-    <div class="wallet-option" id="optMetaMaskMobile">
-      <div class="wallet-icon mm-mobile">📱</div>
-      <div class="wallet-info">
-        <div class="wallet-name">MetaMask Mobile</div>
-        <div class="wallet-desc">Opens this site inside the MetaMask app</div>
-      </div>
-      <div class="wallet-arrow">→</div>
+  <div id="deniedScreen" style="display:none;">
+    <div class="denied">
+      <div class="denied-icon">⛔</div>
+      <div class="denied-title">ACCESS DENIED</div>
+      <div class="denied-sub">This wallet is not authorized as owner on any deployed contract.</div>
     </div>
   </div>
+
+  <div id="adminPanel" style="display:none;">
+
+    <div class="panel">
+      <div class="panel-top"></div>
+      <div class="panel-inner">
+        <div class="tier-rows" id="tierRows">
+          <div class="tier-row bronze-row">
+            <div class="tr-left"><span class="tr-emblem" style="color:var(--bronze);">⬡</span><span class="tr-name" style="color:var(--bronze2);">BRONZE</span></div>
+            <div class="tr-right"><div class="tr-amount" id="b-amt" style="color:var(--bronze2);">—</div><div class="tr-status" id="b-status" style="color:rgba(255,255,255,0.2);">checking…</div></div>
+          </div>
+          <div class="tier-row silver-row">
+            <div class="tr-left"><span class="tr-emblem" style="color:var(--silver);">◈</span><span class="tr-name" style="color:var(--silver2);">SILVER</span></div>
+            <div class="tr-right"><div class="tr-amount" id="s-amt" style="color:var(--silver2);">—</div><div class="tr-status" id="s-status" style="color:rgba(255,255,255,0.2);">checking…</div></div>
+          </div>
+          <div class="tier-row gold-row">
+            <div class="tr-left"><span class="tr-emblem" style="color:var(--gold);">✦</span><span class="tr-name" style="color:var(--gold2);">GOLD</span></div>
+            <div class="tr-right"><div class="tr-amount" id="g-amt" style="color:var(--gold2);">—</div><div class="tr-status" id="g-status" style="color:rgba(255,255,255,0.2);">checking…</div></div>
+          </div>
+        </div>
+
+        <div class="total-row">
+          <span class="total-label">Total Withdrawable</span>
+          <span class="total-amount" id="totalAmt">— AVAX</span>
+        </div>
+
+        <button class="sweep-btn" id="sweepBtn" onclick="sweepAll()" disabled>⚡ WITHDRAW ALL TO OWNER WALLET</button>
+        <button class="refresh-btn" onclick="refreshBalances()">↻ refresh balances</button>
+      </div>
+    </div>
+
+    <div class="log-panel" id="logPanel" style="display:none;">
+      <div class="log-title">// transaction log</div>
+      <div class="log-list" id="logList"></div>
+    </div>
+
+  </div>
+
+  <footer>GREEN AVAX ADMIN · AVALANCHE C-CHAIN · NOT LINKED PUBLICLY</footer>
 </div>
 
-<!-- My Trees slide-in panel -->
-<div class="trees-panel-overlay" id="treesPanelOverlay"></div>
-<div class="trees-panel" id="treesPanel">
-  <div class="trees-panel-head">
-    <h2>My Trees</h2>
-    <button class="trees-panel-close" id="treesPanelClose">&times;</button>
-  </div>
-  <p class="trees-panel-sub" id="myTreesCount">Connect your wallet to view your trees.</p>
-  <div class="trees-panel-grid" id="myTreesGrid"></div>
-</div>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.1/ethers.umd.min.js"></script>
 <script>
-  // ---------- Config ----------
-  const GRAV_TOKEN_ADDRESS = "0xbb370fdb0c0b9c717ecabc5949d461f97f64979f";
-  const NFT_CONTRACT_ADDRESS = "0xEf9F48B39a46AeA12a2e114d0894BC2b805306Ad";
-  const AVALANCHE_CHAIN_ID = "0xa86a"; // 43114 in hex
+const TIERS = {
+  b: { addr:"0xbe71B1A5C9Ce53CbDa369951AF28430Aa61d42e3", label:"BRONZE", col:"var(--bronze2)" },
+  s: { addr:"0x65EF99B8b5bBd2C4877fbAD4674e6945cF1de71E", label:"SILVER", col:"var(--silver2)" },
+  g: { addr:"0x41b94a549c62307BD248390EfEf82e94BFB1720D", label:"GOLD",   col:"var(--gold2)" }
+};
+const CHAIN = 43114;
+const ABI = [
+  "function owner() view returns (address)",
+  "function avaxCollected() view returns (uint256)",
+  "function withdrawAVAX() external"
+];
 
-  const ERC20_ABI = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "function decimals() view returns (uint8)",
-    "function symbol() view returns (string)"
-  ];
+let provider, signer, userAddr;
+const ctrs = {};
+let balances = { b: 0n, s: 0n, g: 0n };
 
-  const NFT_ABI = [
-    "function mint(uint256 speciesId)",
-    "function mintBatch(uint256 speciesId, uint256 quantity)",
-    "function tokensOfOwner(address account) view returns (uint256[])",
-    "function tokenSVG(uint256 tokenId) view returns (string)",
-    "function tokenSpecies(uint256 tokenId) view returns (uint256)",
-    "function getAllSpecies() view returns (tuple(string speciesName, uint256 price, string season, string rarityLabel, string skyColor, string canopyColor, string canopyColorLight, string trunkColor, uint8 shapeType, bool exists)[])",
-    "function remainingSupply() view returns (uint256)",
-    "function totalSupply() view returns (uint256)"
-  ];
+function short(a){ return a.slice(0,6)+'…'+a.slice(-4); }
+function fmtAvax(wei){ return Number(ethers.formatEther(wei)).toFixed(5); }
 
-  // ---------- State ----------
-  let provider, signer, userAddress;
-  let nftContract, gravContractRead, gravContractWrite, nftContractWrite;
-  let gravDecimals = 18; // fallback, overwritten by live read
-  let speciesPrices = {}; // speciesId => price as BigInt (raw units)
+async function connectWallet(){
+  if(!window.ethereum){ alert('Install MetaMask or Core Wallet.'); return; }
+  try{
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    const net = await provider.getNetwork();
+    if(Number(net.chainId) !== CHAIN){
+      try{ await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{chainId:'0xa86a'}] }); }
+      catch(e){ alert('Please switch to Avalanche C-Chain.'); return; }
+    }
+    signer = await provider.getSigner();
+    userAddr = await signer.getAddress();
 
-  const statusEl = document.getElementById("statusMsg");
-  const connectBtn = document.getElementById("connectBtn");
+    for(const k of ['b','s','g']) ctrs[k] = new ethers.Contract(TIERS[k].addr, ABI, signer);
 
-  function showStatus(msg, type = "") {
-    statusEl.className = "status-msg show" + (type ? " " + type : "");
-    statusEl.innerHTML = msg;
-  }
-
-  function hideStatus() {
-    statusEl.className = "status-msg";
-  }
-
-  // ---------- Wallet modal ----------
-  const walletModalOverlay = document.getElementById("walletModalOverlay");
-  const walletModalClose = document.getElementById("walletModalClose");
-
-  function openWalletModal() {
-    walletModalOverlay.classList.add("show");
-  }
-
-  function closeWalletModal() {
-    walletModalOverlay.classList.remove("show");
-  }
-
-  connectBtn.addEventListener("click", () => {
-    // If already connected, clicking again does nothing destructive — just reopen picker
-    openWalletModal();
-  });
-
-  walletModalClose.addEventListener("click", closeWalletModal);
-  walletModalOverlay.addEventListener("click", (e) => {
-    if (e.target === walletModalOverlay) closeWalletModal();
-  });
-
-  function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  }
-
-  // Finds a specific injected provider among possibly multiple (MetaMask + Core both inject window.ethereum,
-  // and may populate window.ethereum.providers[] when more than one extension is active).
-  function getInjectedProvider(preferredFlag) {
-    if (typeof window.ethereum === "undefined") return null;
-
-    if (Array.isArray(window.ethereum.providers)) {
-      const match = window.ethereum.providers.find(p => p[preferredFlag]);
-      if (match) return match;
+    // Verify owner on at least one contract
+    let isOwner = false;
+    for(const k of ['b','s','g']){
+      try{
+        const o = await ctrs[k].owner();
+        if(o.toLowerCase() === userAddr.toLowerCase()) isOwner = true;
+      }catch(e){}
     }
 
-    if (window.ethereum[preferredFlag]) return window.ethereum;
+    document.getElementById('lockScreen').style.display='none';
 
-    // Fallback: only one wallet installed, assume it's the one the user picked
-    return window.ethereum;
-  }
-
-  document.getElementById("optMetaMask").addEventListener("click", async () => {
-    if (isMobileDevice() && typeof window.ethereum === "undefined") {
-      // No injected provider on mobile browser — deep link into MetaMask app instead
-      launchMetaMaskMobile();
-      return;
-    }
-    if (typeof window.ethereum === "undefined") {
-      showStatus('No wallet extension detected. Install MetaMask from <a href="https://metamask.io/download" target="_blank" style="color:var(--leaf)">metamask.io</a>.', "error");
-      closeWalletModal();
-      return;
-    }
-    const injected = getInjectedProvider("isMetaMask");
-    closeWalletModal();
-    await connectWallet(injected);
-  });
-
-  document.getElementById("optCore").addEventListener("click", async () => {
-    if (typeof window.ethereum === "undefined" || !(window.ethereum.isAvalanche || (Array.isArray(window.ethereum.providers) && window.ethereum.providers.some(p => p.isAvalanche)))) {
-      showStatus('Core Wallet not detected. Install it from <a href="https://core.app" target="_blank" style="color:var(--leaf)">core.app</a>.', "error");
-      closeWalletModal();
-      return;
-    }
-    const injected = getInjectedProvider("isAvalanche");
-    closeWalletModal();
-    await connectWallet(injected);
-  });
-
-  document.getElementById("optMetaMaskMobile").addEventListener("click", () => {
-    closeWalletModal();
-    launchMetaMaskMobile();
-  });
-
-  function launchMetaMaskMobile() {
-    // MetaMask's deep link format opens the current page inside the MetaMask in-app browser,
-    // where window.ethereum becomes available.
-    const currentUrl = window.location.href.replace(/^https?:\/\//, "");
-    const deepLink = "https://metamask.app.link/dapp/" + currentUrl;
-    showStatus("Opening MetaMask app...", "");
-    window.location.href = deepLink;
-  }
-
-  // ---------- Wallet connect ----------
-  async function connectWallet(injectedProvider) {
-    const ethProvider = injectedProvider || window.ethereum;
-
-    if (!ethProvider) {
-      showStatus("No wallet found. Please install MetaMask or Core Wallet.", "error");
+    if(!isOwner){
+      document.getElementById('deniedScreen').style.display='block';
       return;
     }
 
-    try {
-      provider = new ethers.BrowserProvider(ethProvider);
+    document.getElementById('ownerLine').style.display='block';
+    document.getElementById('ownerAddr').textContent = short(userAddr);
+    document.getElementById('adminPanel').style.display='block';
 
-      // Ensure we're on Avalanche C-Chain
-      const network = await provider.getNetwork();
-      if (network.chainId !== 43114n) {
-        try {
-          await ethProvider.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: AVALANCHE_CHAIN_ID }]
-          });
-        } catch (switchErr) {
-          showStatus("Please switch your wallet to Avalanche C-Chain to continue.", "error");
-          return;
-        }
-        provider = new ethers.BrowserProvider(ethProvider);
+    await refreshBalances();
+  }catch(e){ console.error(e); }
+}
+
+async function refreshBalances(){
+  const map = {b:'b',s:'s',g:'g'};
+  let total = 0n;
+  for(const k of ['b','s','g']){
+    try{
+      const bal = await ctrs[k].avaxCollected();
+      balances[k] = bal;
+      total += bal;
+      document.getElementById(k+'-amt').textContent = fmtAvax(bal) + ' AVAX';
+      const statusEl = document.getElementById(k+'-status');
+      if(bal === 0n){
+        statusEl.textContent = 'empty — will skip';
+        statusEl.style.color = 'rgba(255,255,255,0.2)';
+      } else {
+        statusEl.textContent = 'ready to withdraw';
+        statusEl.style.color = TIERS[k].col.replace('var(','').replace(')','');
+        statusEl.style.color = '';
+        statusEl.style.setProperty('color', TIERS[k].col);
       }
+    }catch(e){ console.warn(k, e); }
+  }
+  document.getElementById('totalAmt').textContent = fmtAvax(total) + ' AVAX';
+  document.getElementById('sweepBtn').disabled = (total === 0n);
+}
 
-      await provider.send("eth_requestAccounts", []);
-      signer = await provider.getSigner();
-      userAddress = await signer.getAddress();
+function addLog(msg, type){
+  const panel = document.getElementById('logPanel');
+  panel.style.display = 'block';
+  const list = document.getElementById('logList');
+  const item = document.createElement('div');
+  item.className = 'log-item ' + type;
+  item.innerHTML = msg;
+  list.appendChild(item);
+  return item;
+}
 
-      connectBtn.textContent = userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+async function sweepAll(){
+  const btn = document.getElementById('sweepBtn');
+  btn.disabled = true;
+  btn.textContent = 'PROCESSING...';
+  document.getElementById('logList').innerHTML = '';
+  document.getElementById('logPanel').style.display = 'block';
 
-      nftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
-      nftContractWrite = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
-      gravContractRead = new ethers.Contract(GRAV_TOKEN_ADDRESS, ERC20_ABI, provider);
-      gravContractWrite = new ethers.Contract(GRAV_TOKEN_ADDRESS, ERC20_ABI, signer);
+  let totalSwept = 0n;
+  let signCount = 0;
 
-      try {
-        gravDecimals = await gravContractRead.decimals();
-      } catch (e) {
-        console.warn("Could not read GRAV decimals, defaulting to 18");
-      }
+  for(const k of ['b','s','g']){
+    const tier = TIERS[k];
+    if(balances[k] === 0n){
+      addLog(`<span>${tier.label}</span><span>SKIPPED — empty</span>`, 'skip');
+      continue;
+    }
 
-      hideStatus();
-      await loadSpeciesPricesAndRemaining();
-      await loadMyTrees();
-    } catch (err) {
-      console.error("Wallet connection failed:", err);
-      showStatus("Wallet connection failed. Please try again.", "error");
+    const logItem = addLog(`<span>${tier.label}</span><span>Awaiting signature…</span>`, 'pending');
+    try{
+      const tx = await ctrs[k].withdrawAVAX();
+      logItem.querySelector('span:last-child').textContent = 'Confirming…';
+      const receipt = await tx.wait();
+      signCount++;
+      totalSwept += balances[k];
+      logItem.className = 'log-item success';
+      logItem.innerHTML = `<span>${tier.label}</span><span>✓ ${fmtAvax(balances[k])} AVAX swept</span>`;
+    }catch(e){
+      logItem.className = 'log-item error';
+      const msg = e?.reason || e?.message || 'Transaction failed';
+      logItem.innerHTML = `<span>${tier.label}</span><span>✗ ${msg.slice(0,40)}</span>`;
     }
   }
 
-  // ---------- Load live species prices + remaining supply ----------
-  async function loadSpeciesPricesAndRemaining() {
-    try {
-      const allSpecies = await nftContract.getAllSpecies();
-      allSpecies.forEach((s, idx) => {
-        speciesPrices[idx] = s.price; // BigInt, raw units (respects GRAV decimals)
-      });
-      updateAllTotals();
+  addLog(`<span>TOTAL</span><span>${fmtAvax(totalSwept)} AVAX in ${signCount} signature(s)</span>`, 'success');
 
-      const remaining = await nftContract.remainingSupply();
-      document.getElementById("remainingStat").textContent = Number(remaining).toLocaleString();
-    } catch (err) {
-      console.error("Failed to load species/remaining supply:", err);
-    }
+  btn.textContent = '⚡ WITHDRAW ALL TO OWNER WALLET';
+  await refreshBalances();
+}
+
+window.addEventListener('load', async () => {
+  if(window.ethereum){
+    const acc = await window.ethereum.request({ method:'eth_accounts' });
+    if(acc.length) connectWallet();
   }
-
-  function formatPrice(rawAmount) {
-    return ethers.formatUnits(rawAmount, gravDecimals);
-  }
-
-  function parsePrice(amountStr) {
-    return ethers.parseUnits(amountStr, gravDecimals);
-  }
-
-  // ---------- Quantity selectors ----------
-  document.querySelectorAll(".qty-row").forEach(row => {
-    const speciesId = row.getAttribute("data-species");
-    const valEl = row.querySelector(".qty-val");
-    const minusBtn = row.querySelector(".qty-minus");
-    const plusBtn = row.querySelector(".qty-plus");
-
-    minusBtn.addEventListener("click", () => {
-      let qty = parseInt(valEl.textContent);
-      if (qty > 1) {
-        valEl.textContent = qty - 1;
-        updateTotal(speciesId);
-      }
-    });
-
-    plusBtn.addEventListener("click", () => {
-      let qty = parseInt(valEl.textContent);
-      valEl.textContent = qty + 1;
-      updateTotal(speciesId);
-    });
-  });
-
-  function getQty(speciesId) {
-    const row = document.querySelector(`.qty-row[data-species="${speciesId}"]`);
-    return parseInt(row.querySelector(".qty-val").textContent);
-  }
-
-  function updateTotal(speciesId) {
-    const totalEl = document.querySelector(`.total-display[data-species="${speciesId}"]`);
-    const qty = getQty(speciesId);
-
-    if (speciesPrices[speciesId] !== undefined) {
-      const rawTotal = speciesPrices[speciesId] * BigInt(qty);
-      totalEl.textContent = formatPrice(rawTotal) + " GRAV";
-    } else {
-      // Fallback to button's data-base-price before live prices load
-      const btn = document.querySelector(`.buy-btn[data-species="${speciesId}"]`);
-      const basePrice = parseFloat(btn.getAttribute("data-base-price"));
-      totalEl.textContent = (basePrice * qty) + " GRAV";
-    }
-  }
-
-  function updateAllTotals() {
-    document.querySelectorAll(".qty-row").forEach(row => {
-      updateTotal(row.getAttribute("data-species"));
-    });
-  }
-
-  // ---------- Buy flow: approve (if needed) then mint ----------
-  document.querySelectorAll(".buy-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const speciesId = btn.getAttribute("data-species");
-      const qty = getQty(speciesId);
-
-      if (!signer) {
-        showStatus("Connect your wallet first.", "error");
-        return;
-      }
-
-      const originalText = btn.textContent;
-      btn.disabled = true;
-
-      try {
-        const price = speciesPrices[speciesId];
-        if (price === undefined) {
-          showStatus("Still loading prices, try again in a moment.", "error");
-          btn.disabled = false;
-          btn.textContent = originalText;
-          return;
-        }
-
-        const totalCost = price * BigInt(qty);
-
-        // Check current allowance
-        showStatus('<span class="loading-spin"></span> Checking GRAV allowance...');
-        const currentAllowance = await gravContractRead.allowance(userAddress, NFT_CONTRACT_ADDRESS);
-
-        if (currentAllowance < totalCost) {
-          btn.textContent = "Approving...";
-          showStatus('<span class="loading-spin"></span> Approve GRAV spending in your wallet...');
-          const approveTx = await gravContractWrite.approve(NFT_CONTRACT_ADDRESS, totalCost);
-          showStatus('<span class="loading-spin"></span> Waiting for approval to confirm...');
-          await approveTx.wait();
-        }
-
-        // Mint
-        btn.textContent = "Minting...";
-        showStatus('<span class="loading-spin"></span> Confirm mint transaction in your wallet...');
-
-        let mintTx;
-        if (qty === 1) {
-          mintTx = await nftContractWrite.mint(speciesId);
-        } else {
-          mintTx = await nftContractWrite.mintBatch(speciesId, qty);
-        }
-
-        showStatus('<span class="loading-spin"></span> Waiting for mint to confirm on-chain...');
-        await mintTx.wait();
-
-        showStatus(`Minted ${qty} tree${qty > 1 ? "s" : ""} successfully! Open "My Trees" in the top left to view.`, "success");
-
-        await loadSpeciesPricesAndRemaining();
-        await loadMyTrees();
-
-      } catch (err) {
-        console.error("Mint failed:", err);
-        const reason = err?.reason || err?.shortMessage || "Transaction failed or was rejected.";
-        showStatus(reason, "error");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    });
-  });
-
-  // ---------- My Trees nav button + slide-in panel ----------
-  const treesPanel = document.getElementById("treesPanel");
-  const treesPanelOverlay = document.getElementById("treesPanelOverlay");
-  const myTreesNavBtn = document.getElementById("myTreesNavBtn");
-  const treesPanelClose = document.getElementById("treesPanelClose");
-  const myTreesCountPill = document.getElementById("myTreesCountPill");
-
-  function openTreesPanel() {
-    treesPanel.classList.add("show");
-    treesPanelOverlay.classList.add("show");
-    if (userAddress) loadMyTrees();
-  }
-
-  function closeTreesPanel() {
-    treesPanel.classList.remove("show");
-    treesPanelOverlay.classList.remove("show");
-  }
-
-  myTreesNavBtn.addEventListener("click", () => {
-    if (!userAddress) {
-      openWalletModal();
-      return;
-    }
-    openTreesPanel();
-  });
-
-  treesPanelClose.addEventListener("click", closeTreesPanel);
-  treesPanelOverlay.addEventListener("click", closeTreesPanel);
-
-  async function loadMyTrees() {
-    const grid = document.getElementById("myTreesGrid");
-    const countEl = document.getElementById("myTreesCount");
-
-    grid.innerHTML = '<div class="empty-trees"><span class="loading-spin"></span> Loading your trees...</div>';
-
-    try {
-      const tokenIds = await nftContract.tokensOfOwner(userAddress);
-
-      myTreesCountPill.textContent = tokenIds.length;
-      myTreesCountPill.classList.toggle("show", tokenIds.length > 0);
-
-      if (tokenIds.length === 0) {
-        grid.innerHTML = '<div class="empty-trees">You don\'t own any trees yet — mint one to get started.</div>';
-        countEl.textContent = "No trees yet";
-        return;
-      }
-
-      countEl.textContent = `${tokenIds.length} tree${tokenIds.length > 1 ? "s" : ""} owned`;
-      grid.innerHTML = "";
-
-      for (const id of tokenIds) {
-        const svg = await nftContract.tokenSVG(id);
-        const card = document.createElement("div");
-        card.className = "my-tree-card";
-        card.innerHTML = svg + `<div class="my-tree-label"><span class="id">#${id}</span></div>`;
-        grid.appendChild(card);
-      }
-    } catch (err) {
-      console.error("Failed to load owned trees:", err);
-      grid.innerHTML = '<div class="empty-trees">Could not load your trees. Please refresh and try again.</div>';
-    }
-  }
-
-  // ---------- Footer link ----------
-  document.getElementById("contractLink").href = "https://snowtrace.io/address/" + GRAV_TOKEN_ADDRESS;
-  document.getElementById("contractLink").target = "_blank";
-
-  // ---------- Initial load (read-only, no wallet needed) ----------
-  (async function initReadOnly() {
-    try {
-      const fallbackProvider = new ethers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc");
-      const readContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, fallbackProvider);
-      const remaining = await readContract.remainingSupply();
-      document.getElementById("remainingStat").textContent = Number(remaining).toLocaleString();
-    } catch (err) {
-      console.warn("Initial read-only load failed:", err);
-    }
-  })();
+});
 </script>
-
 </body>
 </html>
